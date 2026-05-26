@@ -7,22 +7,22 @@
 
 [Script]
 # Apple登录 -> premium
-http-response ^https?://yinke\.jinguizi07\.cn/api/auth/apple-login script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Login
+http-response ^https?://yinke\.jinguizi07\.cn/api/auth/apple-login script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Login
 
 # user-info -> premium
-http-response ^https?://yinke\.jinguizi07\.cn/api/user/user-info script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_UserInfo
+http-response ^https?://yinke\.jinguizi07\.cn/api/user/user-info script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_UserInfo
 
 # story-series 所有接口 (card + browsing-history)
-http-response ^https?://yinke\.jinguizi07\.cn/api/story-series/ script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Story
+http-response ^https?://yinke\.jinguizi07\.cn/api/story-series/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Story
 
 # distribution/summary -> 金币
-http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/summary script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Summary
+http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/summary script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Summary
 
 # distribution/exchange/membership
-http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/exchange/membership script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Exchange
+http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/exchange/membership script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Exchange
 
 # video-segments
-http-response ^https?://yinke\.jinguizi07\.cn/api/video-segments/ script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Video
+http-response ^https?://yinke\.jinguizi07\.cn/api/video-segments/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Video
 
 [MITM]
 hostname = %APPEND% yinke.jinguizi07.cn
