@@ -1,0 +1,12 @@
+#!name=训记VIP解锁
+#!desc=训记(SynFit/TrainNote) Premium Unlock - 解锁Grand会员/VIP功能
+#!home=https://github.com/Leslie159357/Loon-Plugins
+#!author=Leslie159357
+#!date=2026-05-26
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/42/ba/a3/42baa3bb-4ace-70e0-8af4-2ab09cd9a560/AppIcon-1-0-1x_U007emarketing-0-7-0-0-85-220.png/256x256bb.png
+
+[Script]
+http-response ^https?://api\.xunjiapp\.cn/(fetch_policy|try_vip_get) script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Xunji/xunji.js
+
+[MITM]
+hostname = api.xunjiapp.cn, eatings.xunjiapp.cn, trains.xunjiapp.cn
