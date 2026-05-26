@@ -3,7 +3,7 @@
 #!author=Leslie
 #!home=https://github.com/Leslie159357/Loon-Plugins/tree/main/plugins/InkerSpeak
 #!icon=https://yinke.jinguizi07.cn/favicon.ico
-#!version=1.4
+#!version=1.5
 
 [Script]
 # Apple登录 -> premium
@@ -12,13 +12,16 @@ http-response ^https?://yinke\.jinguizi07\.cn/api/auth/apple-login script-path=h
 # user-info -> premium
 http-response ^https?://yinke\.jinguizi07\.cn/api/user/user-info script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_UserInfo
 
-# 所有story-series接口（card + browsing-history + image等）
+# story-series 所有接口 (card + browsing-history)
 http-response ^https?://yinke\.jinguizi07\.cn/api/story-series/ script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Story
 
 # distribution/summary -> 金币
 http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/summary script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Summary
 
-# video-segments -> 解锁课程视频
+# distribution/exchange/membership
+http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/exchange/membership script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Exchange
+
+# video-segments
 http-response ^https?://yinke\.jinguizi07\.cn/api/video-segments/ script-path=https://cdn.jsdelivr.net/gh/Leslie159357/Loon-Plugins@main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Video
 
 [MITM]
