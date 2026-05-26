@@ -15,7 +15,6 @@
 | **FitRead** | — | 阅读 · VIP 解锁 | [`fitread.plugin`](plugins/FitRead/fitread.plugin) |
 | **EnglishDaily** | — | 英语天天练（ABC Zone）· VIP/SVIP 解锁 | [`english_daily.plugin`](plugins/EnglishDaily/english_daily.plugin) |
 | **ELSA Speak** | — | AI 英语口语教练 · Premium 解锁（课程/AI对话/角色扮演/宝石） | [`elsa.plugin`](plugins/ELSA-Speak/elsa.plugin) |
-| **Forest 专注** | — | 番茄钟 · Pro 解锁（订阅/金币/宝石/全部树木音效皮肤） | [`forest.plugin`](plugins/Forest/forest.plugin) |
 | **懒人听书** | — | 听书 App · VIP 解锁 v3 终极版 | [`lanrentingshu.plugin`](plugins/LazyListen/lanrentingshu.plugin) |
 | **InkerSpeak** | — | 引客英语/造句说 · Premium 解锁 | [`inkerspeak.plugin`](plugins/InkerSpeak/inkerspeak.plugin) |
 
