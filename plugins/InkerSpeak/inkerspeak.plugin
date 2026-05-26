@@ -1,22 +1,22 @@
 #!name=InkerSpeak Premium Unlock
 #!desc=引客英语/造句说 - 解锁VIP会员功能
 #!author=Leslie
-#!home=https://raw.githubusercontent.com/gist/raw/[GIST_ID]/inkerspeak.plugin
+#!home=https://github.com/Leslie159357/Loon-Plugins/tree/main/plugins/InkerSpeak
 #!icon=https://yinke.jinguizi07.cn/favicon.ico
 #!version=1.0
 
 [Script]
 # 登录 → premium
-http-response ^https?://yinke\.jinguizi07\.cn/api/auth/apple-login script-path=https://raw.githubusercontent.com/gist/raw/[GIST_ID]/inkerspeak.js, requires-body=true, tag=InkerSpeak_Login
+http-response ^https?://yinke\.jinguizi07\.cn/api/auth/apple-login script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Login
 
 # user-info → premium
-http-response ^https?://yinke\.jinguizi07\.cn/api/user/user-info script-path=https://raw.githubusercontent.com/gist/raw/[GIST_ID]/inkerspeak.js, requires-body=true, tag=InkerSpeak_UserInfo
+http-response ^https?://yinke\.jinguizi07\.cn/api/user/user-info script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_UserInfo
 
 # story-series card → 解锁VIP内容
-http-response ^https?://yinke\.jinguizi07\.cn/api/story-series/card/ script-path=https://raw.githubusercontent.com/gist/raw/[GIST_ID]/inkerspeak.js, requires-body=true, tag=InkerSpeak_Card
+http-response ^https?://yinke\.jinguizi07\.cn/api/story-series/card/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Card
 
 # distribution/summary → 金币
-http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/summary script-path=https://raw.githubusercontent.com/gist/raw/[GIST_ID]/inkerspeak.js, requires-body=true, tag=InkerSpeak_Summary
+http-response ^https?://yinke\.jinguizi07\.cn/api/distribution/summary script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/InkerSpeak/inkerspeak.js, requires-body=true, tag=InkerSpeak_Summary
 
 [MITM]
 hostname = %APPEND% yinke.jinguizi07.cn
