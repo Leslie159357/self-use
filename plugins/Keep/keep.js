@@ -91,6 +91,12 @@ const fakeResponses = {
     data: { settingsSummaryViewList: [], hasPaid: true }
   },
 
+  // 6. 课程开始权限验证 - ⭐ 关键！返回status:true才能开练
+  "/nuocha/plans/": {
+    ok: true, errorCode: 0, text: "",
+    data: { status: true, text: "", schema: "" }
+  },
+
   // 6. 弹窗 - 空数据（去购买弹窗）
   "/guide-webapp/v1/popup/getPopUp": {
     errorCode: 0, text: "", data: null
@@ -159,8 +165,11 @@ const regexRules = [
   // 错误码归零
   { pattern: /"errorCode":[1-9]\d*/g, replacement: '"errorCode":0' },
 
-  // 会员权益 data:false → true
+  // 课程开始权限
   { pattern: /"data":false/g, replacement: '"data":true' },
+
+  // 会员权益验证 status:false → true
+  { pattern: /"status":false/g, replacement: '"status":true' },
 ];
 
 // ================== 主逻辑 ==================
