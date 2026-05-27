@@ -1,11 +1,12 @@
 /**
- * Keep Premium Unlock v1.1
+ * Keep Premium Unlock v1.2
  * App: Keep (com.gotokeep.keep) v9.0.20
  * 
  * Intercepts kprime auth/info endpoints to unlock premium membership.
  * All endpoints return plaintext JSON ✅
  * 
- * v1.1: Added /kprime/v2/home/complete/tab/exp intercept, refined field coverage
+ * v1.2: Added /kprime/v1/member/privilege, /kprime/v4/suit/sales/entrance,
+ *       /kprime/v5/signup intercepts. Added tab=live/tab=other support.
  */
 
 const PREMIUM_EXPIRE = 4070908800000; // 2099-01-01
@@ -86,38 +87,43 @@ try {
         return;
     }
 
-    // 3. /kprime/v2/home/complete/tab — Premium home tab page (not /exp)
-    if (/\/kprime\/v2\/home\/complete\/tab\b/.test(url) && !/\/tab\/exp/.test(url) && !/\/tab\?/.test(url)) {
-        if (obj.data) {
-            // Fix memberInfo
+    // 3. /kprime/v2/home/complete/tab — Premium home tab (any tab type: normal, live, other)
+    if (/\/kprime\/v2\/home\/complete\/tab\b/.test(url) && !/\/tab\/exp/.test(url)) {
+        if (obj.data && obj.data.tab === "normal") {
+            // Normal premium tab
             if (obj.data.memberInfo) {
                 obj.data.memberInfo.status = 1;
                 obj.data.memberInfo.gmtExpire = PREMIUM_EXPIRE;
                 obj.data.memberInfo.autoRenew = true;
             }
             obj.data.headCopy = "尊贵的 Keep 会员";
+        } else if (obj.data && obj.data.tab === "live") {
+            // Live streaming tab — unlock LIVE membership
+            if (obj.data.memberInfo) {
+                obj.data.memberInfo.status = 1;
+                obj.data.memberInfo.gmtExpire = PREMIUM_EXPIRE;
+                obj.data.memberInfo.autoRenew = true;
+            }
+            obj.data.headCopy = "尊贵的 Keep 直播畅练卡会员";
         }
         $done({ body: JSON.stringify(obj) });
         return;
     }
 
-    // 4. /kprime/v2/home/complete/tab/exp — Premium tab exp endpoint
+    // 4. /kprime/v2/home/complete/tab/exp — Premium tab exp endpoint (pass through)
     if (/\/kprime\/v2\/home\/complete\/tab\/exp/.test(url)) {
-        // This endpoint returns tabSales/showOtherTabExp flags — pass through
         $done({ body });
         return;
     }
 
-    // 5. /kprime/v1/plan/primeGlobalTips — show prime tips
+    // 5. /kprime/v1/plan/primeGlobalTips — show prime tips (pass through)
     if (/\/kprime\/v1\/plan\/primeGlobalTips/.test(url)) {
-        // Already returns null data when expired, no change needed
         $done({ body });
         return;
     }
 
-    // 6. /kprime/v1/suit/tab/bubble — tab bubble
+    // 6. /kprime/v1/suit/tab/bubble — tab bubble (pass through)
     if (/\/kprime\/v1\/suit\/tab\/bubble/.test(url)) {
-        // No change needed for now
         $done({ body });
         return;
     }
@@ -128,6 +134,35 @@ try {
             obj.data.memberExclusive = true;
         }
         $done({ body: JSON.stringify(obj) });
+        return;
+    }
+
+    // 8. /kprime/v1/member/privilege — Member privilege check
+    if (/\/kprime\/v1\/member\/privilege/.test(url)) {
+        // data: false → true (unlock TRAIN_SUIT privilege)
+        if (obj.data !== undefined) {
+            obj.data = true;
+        }
+        $done({ body: JSON.stringify(obj) });
+        return;
+    }
+
+    // 9. /kprime/v4/suit/sales/entrance — Suit sales entrance
+    if (/\/kprime\/v4\/suit\/sales\/entrance/.test(url)) {
+        if (obj.data) {
+            if (obj.data.memberEntrance) {
+                obj.data.memberEntrance.prime = true;
+                obj.data.memberEntrance.memberStatus = 1;
+                obj.data.memberEntrance.buttonText = "尊贵会员已解锁";
+            }
+        }
+        $done({ body: JSON.stringify(obj) });
+        return;
+    }
+
+    // 10. /kprime/v5/signup — Signup/subscription info (pass through, system metadata)
+    if (/\/kprime\/v5\/signup/.test(url)) {
+        $done({ body });
         return;
     }
 
