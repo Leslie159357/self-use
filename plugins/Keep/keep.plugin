@@ -3,10 +3,10 @@
 #!author=Leslie
 #!home=https://github.com/Leslie159357/Loon-Plugins
 #!icon=https://static1.keepcdn.com/keep-web/favicon/favicon-96x96.png?ver=1.1
-#!version=1.2.1
+#!version=1.3
 
 [Script]
-http-response ^https?:\/\/api\.gotokeep\.com\/(kprime|nuocha|guide-webapp) script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, requires-body=true, timeout=10, tag=Keep Premium
+http-response ^https?:\/\/api\.gotokeep\.com\/(kprime|nuocha|guide-webapp|suit|janus) script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, requires-body=true, timeout=10, tag=Keep Premium
 
 [MITM]
 hostname = %APPEND% api.gotokeep.com

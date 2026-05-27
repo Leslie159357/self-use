@@ -11,7 +11,7 @@
  *
  * [rewrite_local]
  * # Keep Premium Unlock
- * ^https?:\/\/api\.gotokeep\.com\/(kprime|nuocha|guide-webapp) url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js
+ * ^https?:\/\/api\.gotokeep\.com\/(kprime|nuocha|guide-webapp|suit|janus) url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js
  *
  * [mitm]
  * hostname = api.gotokeep.com
@@ -110,6 +110,29 @@ const fakeResponses = {
   // 8. combo/goal
   "/guide-webapp/v1/combogoal/info": {
     errorCode: 0, text: "", data: null
+  },
+
+  // 9. 训练计划会员权益查询 - 返回true才能用
+  "/kprime/v1/member/privilege": {
+    errorCode: 0, text: "", data: true
+  },
+
+  // 10. 训练计划加入权限 - 返回true
+  "/suit/v5/inJoin": {
+    ok: true, data: true, errorCode: 0, text: ""
+  },
+
+  // 11. 训练计划替换权限
+  "/suit/v5/replace/window": {
+    ok: true, data: true, errorCode: 0, text: ""
+  },
+
+  // 12. 训练计划购买入口 - 返回空
+  "/kprime/v4/suit/sales/entrance": {
+    ok: true, errorCode: 0, text: null, moreInfo: null,
+    data: {
+      generalMembershipInfo: { memberships: [] }
+    }
   }
 };
 
@@ -184,8 +207,8 @@ for (let key in fakeResponses) {
   }
 }
 
-// 2. 正则替换（仅对kprime/nuocha/guide接口）
-if (/api\.gotokeep\.com\/(kprime|nuocha|guide)/.test(url)) {
+// 2. 正则替换（仅对kprime/nuocha/guide/suit/janus接口）
+if (/api\.gotokeep\.com\/(kprime|nuocha|guide|suit|janus)/.test(url)) {
   try {
     for (let rule of regexRules) {
       body = body.replace(rule.pattern, rule.replacement);
