@@ -1,0 +1,15 @@
+#!name=Keep Premium Unlock
+#!desc=Unlock Keep (运动健身) premium membership features.
+#!author=Leslie
+#!date=2026-05-27
+
+[Script]
+http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/auth script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_auth
+http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v2\/infoForClient script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_info
+http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v2\/home\/complete\/tab[^/] script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_tab
+http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/plan\/primeGlobalTips script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_tips
+http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/suit\/tab\/bubble script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_bubble
+http-response ^https:\/\/api\.gotokeep\.com\/agamotto-webapp\/v1\/coach\/role\/user script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_coach
+
+[MITM]
+hostname = %APPEND% api.gotokeep.com
