@@ -6,7 +6,7 @@
 [Script]
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/auth script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_auth
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v2\/infoForClient script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_info
-http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v2\/home\/complete\/tab[^/] script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_tab
+http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v2\/home\/complete\/tab(\?|$) script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_tab
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v2\/home\/complete\/tab\/exp script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_tab_exp
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/plan\/primeGlobalTips script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_tips
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/suit\/tab\/bubble script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_kprime_bubble
@@ -14,6 +14,11 @@ http-response ^https:\/\/api\.gotokeep\.com\/agamotto-webapp\/v1\/coach\/role\/u
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v1\/member\/privilege script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_member_privilege
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v4\/suit\/sales\/entrance script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_suit_sales
 http-response ^https:\/\/api\.gotokeep\.com\/kprime\/v5\/signup script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_signup
+http-response ^https:\/\/api\.gotokeep\.com\/arke-webapp\/v2\/suit\/smart\/customize\/preview script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_suit_preview
+http-response ^https:\/\/api\.gotokeep\.com\/suit\/v1\/recommend\/top\/module\/info script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_suit_module
+http-response ^https:\/\/api\.gotokeep\.com\/suit\/v3\/baseInfo script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_suit_base
+http-response ^https:\/\/api\.gotokeep\.com\/suit\/v5\/questions script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_suit_questions
+http-response ^https:\/\/api\.gotokeep\.com\/account\/v2\/dashboard script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Keep/keep.js, timeout=30, tag=keep_dashboard
 
 [MITM]
 hostname = %APPEND% api.gotokeep.com

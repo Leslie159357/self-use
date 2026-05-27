@@ -1,12 +1,12 @@
 /**
- * Keep Premium Unlock v1.2
+ * Keep Premium Unlock v1.3
  * App: Keep (com.gotokeep.keep) v9.0.20
  * 
- * Intercepts kprime auth/info endpoints to unlock premium membership.
+ * Intercepts all known plaintext JSON endpoints to unlock premium membership.
  * All endpoints return plaintext JSON ✅
  * 
- * v1.2: Added /kprime/v1/member/privilege, /kprime/v4/suit/sales/entrance,
- *       /kprime/v5/signup intercepts. Added tab=live/tab=other support.
+ * v1.3: Added /arke-webapp/v2/suit/smart/customize/preview (primeStatus+memberStatus),
+ *       /suit/v1/recommend/top/module/info, /suit/v3/baseInfo, /suit/v5/questions
  */
 
 const PREMIUM_EXPIRE = 4070908800000; // 2099-01-01
@@ -41,7 +41,6 @@ try {
     if (/\/kprime\/v2\/infoForClient/.test(url)) {
         if (obj.data) {
             obj.data.primeStatus = "active";
-            // Fix memberDTOList
             if (Array.isArray(obj.data.memberDTOList)) {
                 obj.data.memberDTOList.forEach(m => {
                     m.memberType = "SENIOR";
@@ -58,26 +57,20 @@ try {
                     m.currentEffectiveDays = 99999;
                 });
             }
-            // Fix status JSON string — replace "expired" with "active" for NORMAL
             if (typeof obj.data.status === "string") {
                 try {
                     let statusObj = JSON.parse(obj.data.status);
                     for (let k in statusObj) {
-                        if (statusObj[k] === "expired") {
-                            statusObj[k] = "active";
-                        }
+                        if (statusObj[k] === "expired") statusObj[k] = "active";
                     }
                     obj.data.status = JSON.stringify(statusObj);
                 } catch (e) {}
             }
-            // Fix paidStatus JSON string
             if (typeof obj.data.paidStatus === "string") {
                 try {
                     let paidObj = JSON.parse(obj.data.paidStatus);
                     for (let k in paidObj) {
-                        if (paidObj[k] === "none") {
-                            paidObj[k] = k === "NORMAL" ? "paid" : paidObj[k];
-                        }
+                        if (paidObj[k] === "none") paidObj[k] = k === "NORMAL" ? "paid" : paidObj[k];
                     }
                     obj.data.paidStatus = JSON.stringify(paidObj);
                 } catch (e) {}
@@ -87,42 +80,37 @@ try {
         return;
     }
 
-    // 3. /kprime/v2/home/complete/tab — Premium home tab (any tab type: normal, live, other)
+    // 3. /kprime/v2/home/complete/tab (any tab: normal, live, other)
     if (/\/kprime\/v2\/home\/complete\/tab\b/.test(url) && !/\/tab\/exp/.test(url)) {
-        if (obj.data && obj.data.tab === "normal") {
-            // Normal premium tab
-            if (obj.data.memberInfo) {
-                obj.data.memberInfo.status = 1;
-                obj.data.memberInfo.gmtExpire = PREMIUM_EXPIRE;
-                obj.data.memberInfo.autoRenew = true;
+        if (obj.data) {
+            if (obj.data.tab === "normal" || obj.data.tab === "live") {
+                if (obj.data.memberInfo) {
+                    obj.data.memberInfo.status = 1;
+                    obj.data.memberInfo.gmtExpire = PREMIUM_EXPIRE;
+                    obj.data.memberInfo.autoRenew = true;
+                }
+                obj.data.headCopy = obj.data.tab === "live" 
+                    ? "尊贵的 Keep 直播畅练卡会员" 
+                    : "尊贵的 Keep 会员";
             }
-            obj.data.headCopy = "尊贵的 Keep 会员";
-        } else if (obj.data && obj.data.tab === "live") {
-            // Live streaming tab — unlock LIVE membership
-            if (obj.data.memberInfo) {
-                obj.data.memberInfo.status = 1;
-                obj.data.memberInfo.gmtExpire = PREMIUM_EXPIRE;
-                obj.data.memberInfo.autoRenew = true;
-            }
-            obj.data.headCopy = "尊贵的 Keep 直播畅练卡会员";
         }
         $done({ body: JSON.stringify(obj) });
         return;
     }
 
-    // 4. /kprime/v2/home/complete/tab/exp — Premium tab exp endpoint (pass through)
+    // 4. /kprime/v2/home/complete/tab/exp — pass through
     if (/\/kprime\/v2\/home\/complete\/tab\/exp/.test(url)) {
         $done({ body });
         return;
     }
 
-    // 5. /kprime/v1/plan/primeGlobalTips — show prime tips (pass through)
+    // 5. /kprime/v1/plan/primeGlobalTips — pass through
     if (/\/kprime\/v1\/plan\/primeGlobalTips/.test(url)) {
         $done({ body });
         return;
     }
 
-    // 6. /kprime/v1/suit/tab/bubble — tab bubble (pass through)
+    // 6. /kprime/v1/suit/tab/bubble — pass through
     if (/\/kprime\/v1\/suit\/tab\/bubble/.test(url)) {
         $done({ body });
         return;
@@ -130,38 +118,71 @@ try {
 
     // 7. /agamotto-webapp/v1/coach/role/user — AI coach
     if (/\/agamotto-webapp\/v1\/coach\/role\/user/.test(url)) {
-        if (obj.data) {
-            obj.data.memberExclusive = true;
-        }
+        if (obj.data) obj.data.memberExclusive = true;
         $done({ body: JSON.stringify(obj) });
         return;
     }
 
-    // 8. /kprime/v1/member/privilege — Member privilege check
+    // 8. /kprime/v1/member/privilege — privilege check
     if (/\/kprime\/v1\/member\/privilege/.test(url)) {
-        // data: false → true (unlock TRAIN_SUIT privilege)
-        if (obj.data !== undefined) {
-            obj.data = true;
+        if (obj.data !== undefined) obj.data = true;
+        $done({ body: JSON.stringify(obj) });
+        return;
+    }
+
+    // 9. /kprime/v4/suit/sales/entrance — suit sales entrance
+    if (/\/kprime\/v4\/suit\/sales\/entrance/.test(url)) {
+        if (obj.data && obj.data.memberEntrance) {
+            obj.data.memberEntrance.prime = true;
+            obj.data.memberEntrance.memberStatus = 1;
+            obj.data.memberEntrance.buttonText = "尊贵会员已解锁";
         }
         $done({ body: JSON.stringify(obj) });
         return;
     }
 
-    // 9. /kprime/v4/suit/sales/entrance — Suit sales entrance
-    if (/\/kprime\/v4\/suit\/sales\/entrance/.test(url)) {
+    // 10. /kprime/v5/signup — pass through
+    if (/\/kprime\/v5\/signup/.test(url)) {
+        $done({ body });
+        return;
+    }
+
+    // 11. /arke-webapp/v2/suit/smart/customize/preview — Suit preview (primeStatus + memberStatus)
+    if (/\/arke-webapp\/v2\/suit\/smart\/customize\/preview/.test(url)) {
         if (obj.data) {
-            if (obj.data.memberEntrance) {
-                obj.data.memberEntrance.prime = true;
-                obj.data.memberEntrance.memberStatus = 1;
-                obj.data.memberEntrance.buttonText = "尊贵会员已解锁";
+            if (obj.data.eventTrackInfo) {
+                obj.data.eventTrackInfo.primeStatus = "active";
+                obj.data.eventTrackInfo.isFree = 1;
+            }
+            if (obj.data.config) {
+                obj.data.config.memberStatus = 1;
             }
         }
         $done({ body: JSON.stringify(obj) });
         return;
     }
 
-    // 10. /kprime/v5/signup — Signup/subscription info (pass through, system metadata)
-    if (/\/kprime\/v5\/signup/.test(url)) {
+    // 12. /suit/v1/recommend/top/module/info — Suit recommendations (pass through, no member fields to change)
+    if (/\/suit\/v1\/recommend\/top\/module\/info/.test(url)) {
+        $done({ body });
+        return;
+    }
+
+    // 13. /suit/v3/baseInfo — Suit base info
+    if (/\/suit\/v3\/baseInfo/.test(url)) {
+        $done({ body });
+        return;
+    }
+
+    // 14. /suit/v5/questions — Suit questions
+    if (/\/suit\/v5\/questions/.test(url)) {
+        $done({ body });
+        return;
+    }
+
+    // 15. /account/v2/dashboard — User dashboard
+    if (/\/account\/v2\/dashboard/.test(url)) {
+        // memberStatus is already null for this user, no change needed
         $done({ body });
         return;
     }
@@ -170,7 +191,6 @@ try {
     $done({ body });
 
 } catch (e) {
-    // If JSON parse fails, pass through
     console.log("Keep Premium Unlock error: " + e.message);
     $done({ body });
 }
