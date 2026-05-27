@@ -91,22 +91,9 @@ const fakeResponses = {
     }
   },
 
-  // 4. 会员页面 (新路径 /native) - ⭐ V1.1新增
-  "/kprime/v2/home/complete/native": {
-    ok: true, errorCode: 0, text: null, moreInfo: null,
-    data: {
-      tab: "normal",
-      memberInfo: {
-        status: 1,
-        gmtExpire: 4102444799000,
-        autoRenew: true
-      },
-      headCopy: "尊贵的会员，欢迎回来",
-      checkTheAgreement: true,
-      moduleItems: [],
-      popup: null
-    }
-  },
+  // 4. 会员页面 (新路径 /native) - 不做完整替换，用正则改字段
+  //    原始响应的moduleItems包含大量UI数据，清空会导致页面空白
+  //    正则替换处理：status, headCopy, gmtExpire 等
 
   // 5. 会员tab实验
   "/kprime/v2/home/complete/tab/exp": {
@@ -183,6 +170,10 @@ const regexRules = [
   { pattern: /"startEnable":false/g, replacement: '"startEnable":true' },
   { pattern: /"restrictedNow":true/g, replacement: '"restrictedNow":false' },
   { pattern: /"membershipOnly":true/g, replacement: '"membershipOnly":false' },
+
+  // -- 修复null的autoRenew和gmtExpire --
+  { pattern: /"gmtExpire":null/g, replacement: '"gmtExpire":4102444799000' },
+  { pattern: /"autoRenew":null/g, replacement: '"autoRenew":true' },
 
   // -- 到期时间→2099年 --
   { pattern: /"gmtExpire":1[0-9]{12}/g, replacement: '"gmtExpire":4102444799000' },
