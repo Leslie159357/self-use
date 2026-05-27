@@ -1,8 +1,8 @@
-// FitRead VIP 解锁
-let body = $response.body;
+// FitRead VIP 解锁 - QX 版
+var body = $response.body;
 if (body) {
   try {
-    let obj = JSON.parse(body);
+    var obj = JSON.parse(body);
     if (obj && obj.data) {
       obj.data.isVip = true;
       obj.data.startDate = "2025-01-01 00:00:00";
