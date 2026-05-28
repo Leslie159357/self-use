@@ -1,0 +1,13 @@
+#!name=Mimio Premium Unlock
+#!desc=Mimio AI英语口语助手 - 解锁会员功能
+#!author=Leslie
+#!home=https://github.com/Leslie159357/Loon-Plugins
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/e8/42/cf/e842cf86-9ba5-fa66-457c-c3e93e7dd3ac/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.jpg
+#!system=ios
+#!date=2026-05-28
+
+[Script]
+Mimio = type=http-response,pattern=^https:\/\/ignite\.net\.cn\/mimio\/api\/v1\/(user\/info|quota\/check|quota\/consume)$,requires-body=1,max-size=131072,script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Mimio/mimio.js
+
+[MITM]
+hostname = %APPEND% ignite.net.cn
