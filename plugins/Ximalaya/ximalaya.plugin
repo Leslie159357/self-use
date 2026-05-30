@@ -1,0 +1,37 @@
+#!name=喜马拉雅 VIP解锁
+#!desc=解锁VIP会员/付费单集/免费试听无限时长
+#!author=Leslie
+#!homepage=https://github.com/Leslie159357/Loon-Plugins
+#!icon=https://imagev2.xmcdn.com/storages/5057-audiofreehighqps/E7/2C/GKwRIJEGPQw3AABJTAFELq35.jpg!op_type=5&upload_type=header&device_type=ios&name=mobile_x_large&magick=webp
+#!system=ios
+#!version=1.0.0
+#!date=2026-05-31
+#!modify=2026-05-31
+
+[URL Rewrite]
+# 不需要URL重写
+
+[MITM]
+hostname = %APPEND% mobwsa.ximalaya.com
+
+[Script]
+# VIP会员状态 — 改为已过期会员（vipStatus:1）
+http-response ^https?://mobwsa\.ximalaya\.com/mobile-user/my/vip requires-body=1 max-size=131072 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_VIP, timeout=10
+
+# 播放页tabs — 核心付费状态/试听时长
+http-response ^https?://mobwsa\.ximalaya\.com/mobile-playpage/playpage/tabs/v2/ requires-body=1 max-size=262144 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_Tabs, timeout=10
+
+# 播放页view — 付费控制
+http-response ^https?://mobwsa\.ximalaya\.com/mobile-playpage/view/ requires-body=1 max-size=131072 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_View, timeout=10
+
+# 专辑价格弹窗 — 隐藏购买按钮
+http-response ^https?://mobwsa\.ximalaya\.com/product/promotion/v1/album/price/ requires-body=1 max-size=262144 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_Price, timeout=10
+
+# 历史记录 — 付费状态
+http-response ^https?://mobwsa\.ximalaya\.com/nyx/history/query/detail requires-body=1 max-size=131072 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_History, timeout=10
+
+# 历史ID列表
+http-response ^https?://mobwsa\.ximalaya\.com/nyx/history/query/id/list requires-body=1 max-size=131072 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_HistoryList, timeout=10
+
+# 首页个人信息 — 改为VIP
+http-response ^https?://mobwsa\.ximalaya\.com/mobile-user/v2/homePage/ requires-body=1 max-size=262144 script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Ximalaya/ximalaya.js, tag=喜马拉雅_HomePage, timeout=10
