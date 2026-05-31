@@ -1,15 +1,12 @@
-#!name=Xmind Pro Unlock
-#!desc=解锁Xmind Pro会员（团队Pro、AI功能、无限sheet、订阅状态）by Minis
+#!name=Xmind Pro Unlock v2
+#!desc=解锁Xmind Pro会员（Pro计划、无限sheet、AI功能等）
 #!author=Minis
 #!tag=解锁,效率,思维导图
 #!system=ios
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/85/0d/ca/850dcaff-61f0-6c3b-e22f-c8f8e60b97c4/AppIcon-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.png
 
 [Script]
-http-response ^https?://www\.xmind\.cn/_res/devices script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Xmind/xmind.js, requires-body=true, tag=Xmind_Devices
-http-response ^https?://www\.xmind\.cn/_res/user_sub_details script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Xmind/xmind.js, requires-body=true, tag=Xmind_SubDetails
-http-response ^https?://www\.xmind\.cn/_api/appstore/active script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Xmind/xmind.js, requires-body=true, tag=Xmind_AppStoreActive
-http-response ^https?://app\.xmind\.cn/api/drive/team/profile-by-id script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Xmind/xmind.js, requires-body=true, tag=Xmind_TeamProfile
+http-response ^https?://app\.xmind\.cn/api/drive/team/profile-by-id requires-body=true, tag=Xmind_TeamProfile, script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Xmind/xmind.js
 
 [Mitm]
-hostname = %APPEND% www.xmind.cn, app.xmind.cn
+hostname = %APPEND% app.xmind.cn
