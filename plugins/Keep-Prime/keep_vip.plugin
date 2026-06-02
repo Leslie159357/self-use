@@ -8,7 +8,7 @@
 #!modify=2026-06-02
 
 [MITM]
-hostname = %APPEND% api.gotokeep.com
+hostname = %APPEND% api.gotokeep.com, m.gotokeep.com
 
 [Script]
 # kprime/v1/auth — 会员认证核心
