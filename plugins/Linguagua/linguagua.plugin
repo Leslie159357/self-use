@@ -1,6 +1,12 @@
-# 瓜瓜跟读 Loon 插件 v2.0
-# Bundle ID: com.muyi.linguagua
-# API: api.lgg.oranglish.com
+#!name=瓜瓜跟读 Linguagua PRO 解锁 v2.1
+#!desc=永久会员 + 小红花99999无限 + 导入不消耗
+#!author=Minis
+#!homepage=https://github.com/Leslie159357
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/f8/fc/de/f8fcde78-3bca-12bb-9c95-a4d5a9802ef5/AppIcon-0-0-1x_U007epad-0-1-0-0-0-85-220.png/512x512bb.png
+#!tag=教育,解锁,瓜瓜跟读
+#!system=ios
+#!date=2026-06-08
+#!version=2.1
 
 [Script]
 # 用户信息 - 注入会员状态
