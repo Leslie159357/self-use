@@ -1,8 +1,8 @@
 // ==CloakNote==
-// 得到大脑 GetNotes VIP 解锁 v2.1
+// 得到大脑 GetNotes VIP 解锁 v2.2
 // Quantumult X 脚本
 // 拦截: dmind.luojilab.com + notes-api.biji.com + get-notes.luojilab.com
-// 基于实际抓包数据结构重写
+// 基于多次实际抓包逐步完善
 // ==/CloakNote==
 
 const url = $request.url;
@@ -16,9 +16,12 @@ if (!body) {
 try {
   let obj = JSON.parse(body);
 
-  // 1. dmind.luojilab.com: /voicenotes/mind/app/v1/user/info
-  //    返回: {"h":{...},"c":{"data":{"user_info":...,"vip_info":{...}}}}
-  if (url.indexOf('/voicenotes/mind/app/v1/user/info') !== -1) {
+  // ==========================================================
+  // 1. 用户信息 - VIP状态 + 权益配额
+  //    dmind.luojilab.com/voicenotes/mind/app/v1/user/info
+  //    get-notes.luojilab.com/voicenotes/web/user/info
+  // ==========================================================
+  if (url.indexOf('/user/info') !== -1) {
     if (obj.c && obj.c.data && obj.c.data.vip_info) {
       let vip = obj.c.data.vip_info;
       vip.is_vip = true;
@@ -55,42 +58,11 @@ try {
     console.log('GetNotes: /user/info -> VIP unlocked + quotas maxed');
   }
 
-  // 2. get-notes.luojilab.com: /voicenotes/web/user/info
-  //    结构同 /voicenotes/mind/app/v1/user/info
-  if (url.indexOf('/voicenotes/web/user/info') !== -1) {
-    if (obj.c && obj.c.data && obj.c.data.vip_info) {
-      let vip = obj.c.data.vip_info;
-      vip.is_vip = true;
-      vip.is_expire = false;
-      vip.begin_time = 1780906248;
-      vip.end_time = 4092599349;
-      vip.expire_time = 4092599349;
-      vip.surplus_days = 36500;
-      vip.subscribed_days = 36500;
-      vip.is_ever_subscribed = true;
-      vip.current_tier = 'pro';
-    }
-    if (obj.c && obj.c.data && obj.c.data.rights_info) {
-      let r = obj.c.data.rights_info;
-      r.meeting_audio_duration_ms = 999999999;
-      r.audio_duration_ms = 999999999;
-      r.class_duration_ms = 999999999;
-      r.ai_trial_count = 99999;
-    }
-    if (obj.c && obj.c.data && obj.c.data.quota_info) {
-      let q = obj.c.data.quota_info;
-      if (q.local_audio_quota) {
-        q.local_audio_quota.granted_duration = 999999999;
-        q.local_audio_quota.remained_duration = 999999999;
-      }
-    }
-    console.log('GetNotes: /voicenotes/web/user/info -> VIP unlocked');
-  }
-
-  // 3. dmind.luojilab.com + notes-api.biji.com: /vipcards/user (两个域名都用)
-  //    /shop/mind/app/v1/vipcards/user (dmind)
-  //    /shop/app/v1/vipcards/user (notes-api)
-  //    返回: {"h":{...},"c":{"user":{...},"vip_info":{...}}}
+  // ==========================================================
+  // 2. VIP卡信息 - 两个域名
+  //    dmind.luojilab.com/shop/mind/app/v1/vipcards/user
+  //    notes-api.biji.com/shop/app/v1/vipcards/user
+  // ==========================================================
   if (url.indexOf('/vipcards/user') !== -1) {
     if (obj.c && obj.c.vip_info) {
       let vip = obj.c.vip_info;
@@ -112,9 +84,13 @@ try {
     console.log('GetNotes: /vipcards/user -> VIP unlocked');
   }
 
-  // 4. notes-api.biji.com: /shop/app/v1/vipcards (列表)
-  //    实际结构: {"h":{},"c":{"cards":[{...},...]}}
-  if (url.indexOf('/shop/app/v1/vipcards') !== -1 && url.indexOf('/user') === -1) {
+  // ==========================================================
+  // 3. VIP卡列表 + Max卡 - 已购标记
+  //    notes-api.biji.com/shop/app/v1/vipcards
+  //    notes-api.biji.com/shop/app/v1/maxcards
+  // ==========================================================
+  if ((url.indexOf('/shop/app/v1/vipcards') !== -1 && url.indexOf('/user') === -1) || 
+      url.indexOf('/shop/app/v1/maxcards') !== -1) {
     if (obj.c && obj.c.cards && Array.isArray(obj.c.cards)) {
       obj.c.cards.forEach(function(card) {
         card.is_purchased = true;
@@ -125,23 +101,34 @@ try {
         card.origin_price = "0.00";
       });
     }
-    console.log('GetNotes: /vipcards -> all purchased');
+    console.log('GetNotes: /vipcards|maxcards -> all purchased');
   }
 
-  // 5. notes-api.biji.com: /shop/app/v1/maxcards
-  //    实际结构: {"h":{},"c":{"cards":[{...},...]}}
-  if (url.indexOf('/shop/app/v1/maxcards') !== -1) {
-    if (obj.c && obj.c.cards && Array.isArray(obj.c.cards)) {
-      obj.c.cards.forEach(function(card) {
-        card.is_purchased = true;
-        card.price = "0.00";
-        card.available_buy = false;
-      });
+  // ==========================================================
+  // 4. 权益使用情况 - 配额展示
+  //    dmind.luojilab.com/voicenotes/mind/app/v1/user/rights/usage
+  // ==========================================================
+  if (url.indexOf('/user/rights/usage') !== -1) {
+    if (obj.c) {
+      if (obj.c.local_audio) {
+        obj.c.local_audio.granted = '999999分钟';
+        obj.c.local_audio.remaining = '999999分钟';
+        obj.c.local_audio.used = '已用0';
+      }
+      if (obj.c.knowledge_topic) {
+        obj.c.knowledge_topic.granted = '1TB';
+        obj.c.knowledge_topic.remaining = '1TB';
+      }
+      if (obj.c.voice_card) {
+        obj.c.voice_card.should_hide = false;
+      }
     }
-    console.log('GetNotes: /maxcards -> all purchased');
+    console.log('GetNotes: /rights/usage -> quotas display maxed');
   }
 
-  // 6. dmind.luojilab.com: /shop/mind/app/v1/vipcards/purchase
+  // ==========================================================
+  // 5. 购买 - 伪造成功
+  // ==========================================================
   if (url.indexOf('/vipcards/purchase') !== -1) {
     if (obj.c) {
       obj.c.order_status = 'PAY_SUCCESS';
@@ -150,7 +137,9 @@ try {
     console.log('GetNotes: /purchase -> success');
   }
 
-  // 7. dmind.luojilab.com: /shop/mind/app/v1/vipcards/polling
+  // ==========================================================
+  // 6. 轮询 - 支付成功
+  // ==========================================================
   if (url.indexOf('/vipcards/polling') !== -1) {
     if (obj.c) {
       obj.c.status = 1;
@@ -159,7 +148,9 @@ try {
     console.log('GetNotes: /polling -> success');
   }
 
-  // 8. dmind.luojilab.com: /shop/mind/app/v1/activity/education_2025/prize/check
+  // ==========================================================
+  // 7. 活动检查 - 可领取
+  // ==========================================================
   if (url.indexOf('/activity/education_2025/prize/check') !== -1) {
     if (obj.c) {
       obj.c.has_been_edu_certified = true;
@@ -170,12 +161,12 @@ try {
     console.log('GetNotes: /prize/check -> can claim');
   }
 
-  // 9. dmind.luojilab.com: /voicenotes/mind/app/v1/normal/check
+  // ==========================================================
+  // 8. normal/check - 保留原始数据，不做破坏
+  // ==========================================================
   if (url.indexOf('/voicenotes/mind/app/v1/normal/check') !== -1) {
-    if (obj.c) {
-      obj.c.is_normal = true;
-    }
-    console.log('GetNotes: /normal/check -> ok');
+    // 透传，不做修改以免破坏活动配置
+    console.log('GetNotes: /normal/check -> passthrough');
   }
 
   $done({body: JSON.stringify(obj)});
