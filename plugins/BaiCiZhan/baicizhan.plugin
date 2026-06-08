@@ -1,14 +1,11 @@
-#!name=百词斩Pro会员解锁
-#!desc=解锁百词斩Pro会员功能
+#!name=百词斩 VIP解锁
+#!desc=解锁百词斩所有VIP/会员功能
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9e/78/4d/9e784d88-1644-7c09-7287-83b62e17ef6a/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.png
 #!author=Leslie159357
-#!home=https://github.com/Leslie159357/Loon-Plugins/tree/main/plugins/BaiCiZhan
-#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/68/74/47/687447ea-12f9-9f0f-d41a-2475891e2d86/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.png
-#!date=2026-05-27
-#!tag=unlock
+#!homepage=https://github.com/Leslie159357/Loon-Plugins
 
 [Script]
-http-response ^https?://strategy\.baicizhan\.com/api/strategy/get_member_info_page script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan.js, requires-body=true, timeout=10, tag=baicizhan_vip
-http-response ^https?://learn\.baicizhan\.com/api/mall/proxy/virtual-currency/apple/get_user_ios_promotion_id_list script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan.js, requires-body=true, timeout=10, tag=baicizhan_promo
+http-response ^https?:\/\/(learn|conan|system|try|du|passport)\.baicizhan\.com\/.* script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Baicizhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩VIP解锁
 
-[MITM]
-hostname = %APPEND% strategy.baicizhan.com, learn.baicizhan.com
+[Mitm]
+hostname = learn.baicizhan.com, conan.baicizhan.com, system.baicizhan.com, try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com

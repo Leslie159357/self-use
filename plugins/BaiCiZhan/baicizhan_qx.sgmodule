@@ -1,0 +1,13 @@
+# 百词斩 - Baicizhan VIP Unlock
+# Quantumult X 模块
+# 安装: 复制本链接 → QX右下角三图标 → 模块 → 右上角➕ → 粘贴链接 → 确定
+# 确保在 MitM → 主机名 中已添加以下域名:
+#   learn.baicizhan.com, conan.baicizhan.com, system.baicizhan.com
+#   try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com
+
+[MITM]
+hostname = %APPEND% learn.baicizhan.com, conan.baicizhan.com, system.baicizhan.com, try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com
+
+[Script]
+# 百词斩 全部API拦截 - 修改VIP/会员字段
+http-response ^https?:\/\/(learn|conan|system|try|du|passport)\.baicizhan\.com\/.* requires-body=1, script-path= https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Baicizhan/baicizhan_qx.js, tag=百词斩VIP解锁, timeout=10
