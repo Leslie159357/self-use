@@ -22,3 +22,4 @@
 | [InkerSpeak](plugins/InkerSpeak/inkerspeak.plugin) | InkerSpeak | 解锁 |
 | [YouMind](plugins/YouMind/youmind.plugin) | YouMind | 解锁 |
 | [Polypal 会员解锁](plugins/Polypal/polypal.plugin) | Polypal (Timekettle Live Translator) | 解锁VIP会员 - 无限翻译时长 |
+| [墨墨记忆卡 专业版解锁](plugins/Markji/markji.plugin) | 墨墨记忆卡 | 解锁专业版 |
