@@ -1,9 +1,27 @@
 [rewrite_local]
+# 核心：用户VIP状态 - subscribe.valid/false→true, forever: 0→1
 ^https:\/\/fimo\.appfimo\.com\/fimo-user\/user$ url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
+# 全部胶卷列表 - 解锁VIP胶卷 special:"vip"→"free"
 ^https:\/\/fimo\.appfimo\.com\/fimo-common\/filmAll url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
+# 订阅配置 - 价格改为0.01元
 ^https:\/\/fimo\.appfimo\.com\/fimo-common\/subscribeConfig$ url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
+# 苹果收据验证
 ^https:\/\/fimo\.appfimo\.com\/fimo-common\/apple\/certificate$ url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
+# 苹果购买处理
 ^https:\/\/fimo\.appfimo\.com\/fimo-common\/apple\/purchase$ url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
 
+# 用户数据同步
+^https:\/\/fimo\.appfimo\.com\/fimo-user\/user\/sync url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
+# 用户配置/系统配置
+^https:\/\/fimo\.appfimo\.com\/fimo-common\/config$ url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
+# 启动弹窗配置
+^https:\/\/fimo\.appfimo\.com\/fimo-common\/startPopConfig url script-response-body https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/FIMO/fimo.js
+
 [mitm]
-hostname = fimo.appfimo.com
+hostname = fimo.appfimo.com, mobile.appfimo.com
