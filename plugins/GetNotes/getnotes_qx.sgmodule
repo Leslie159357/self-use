@@ -1,20 +1,22 @@
 #!name = 得到大脑 VIP 解锁
-#!desc = 解锁得到大脑 GetNotes VIP会员 + AI对话限制解除
+#!desc = 解锁得到大脑 GetNotes VIP会员 + PRO权益 + AI对话无限 + 配额全满
 #!author = Minis
 #!home = https://github.com/Leslie159357/Loon-Plugins
 #!icon = https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/54/0c/c7/540cc749-3627-3dd5-1978-9c88b374b550/AppIcon-0-0-1x_U007emarketing-0-7-0-0-0-85-220.png
 #!system = ios
 #!date = 2026-06-08
-#!version = 1.0
+#!version = 2.0
 
 [Script]
-http-response ^https?:\/\/notes-api\.biji\.com\/ddbrain\/vip\/info script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-VIP核心
-http-response ^https?:\/\/notes-api\.biji\.com\/shop\/mind\/app\/v1\/vipcards\/user script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-VIP卡信息
-http-response ^https?:\/\/notes-api\.biji\.com\/shop\/mind\/app\/v1\/vipcards\/iap\/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-内购收据
-http-response ^https?:\/\/notes-api\.biji\.com\/shop\/mind\/app\/v1\/vipcards\/purchase script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-购买
-http-response ^https?:\/\/notes-api\.biji\.com\/shop\/mind\/app\/v1\/vipcards\/polling script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-轮询
-http-response ^https?:\/\/yoda-sse\.biji\.com\/yoda\/mind\/app\/v1\/chats\/llm_input_restrict script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-AI限制解除
-http-response ^https?:\/\/notes-api\.biji\.com\/shop\/mind\/app\/v1\/activity\/education_2025\/prize\/check script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-活动检查
+http-response ^https?:\/\/dmind\.luojilab\.com\/voicenotes\/mind\/app\/v1\/user\/info script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-用户信息
+http-response ^https?:\/\/get-notes\.luojilab\.com\/voicenotes\/web\/user\/info script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-WEB用户信息
+http-response ^https?:\/\/notes-api\.biji\.com\/shop\/app\/v1\/vipcards\/user script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-VIP卡信息
+http-response ^https?:\/\/notes-api\.biji\.com\/shop\/app\/v1\/vipcards$ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-VIP卡列表
+http-response ^https?:\/\/notes-api\.biji\.com\/shop\/app\/v1\/maxcards script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-Max卡
+http-response ^https?:\/\/dmind\.luojilab\.com\/shop\/mind\/app\/v1\/vipcards\/purchase script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-购买
+http-response ^https?:\/\/dmind\.luojilab\.com\/shop\/mind\/app\/v1\/vipcards\/polling script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-轮询
+http-response ^https?:\/\/dmind\.luojilab\.com\/shop\/mind\/app\/v1\/activity\/education_2025\/prize\/check script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-活动检查
+http-response ^https?:\/\/dmind\.luojilab\.com\/voicenotes\/mind\/app\/v1\/normal\/check script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/GetNotes/getnotes_qx.js, requires-body=true, timeout=10, tag=GetNotes-正常检查
 
 [Mitm]
-hostname = notes-api.biji.com, yoda-sse.biji.com
+hostname = dmind.luojilab.com, notes-api.biji.com, get-notes.luojilab.com
