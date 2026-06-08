@@ -1,0 +1,23 @@
+#!name=Pollykann 会员解锁
+#!desc=解锁 Pollykann 英语视频学习会员 - 拦截首页/商品列表/设备验证
+#!author=Minis
+#!home=https://github.com/Leslie159357/Loon-Plugins/tree/main/plugins/Pollykann
+#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/04/2a/5b/042a5b37-af7c-5bf7-fe4f-f7b1ada8e14b/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.png
+#!date=2026-06-08
+#!tag=unlock,学习,英语,视频
+
+[Script]
+http-response ^https?:\/\/api\.pollykann\.com\/home$ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Pollykann/pollykann.js, requires-body=true, timeout=10, tag=Pollykann 首页VIP注入
+
+http-response ^https?:\/\/api\.pollykann\.com\/vip\/productList script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Pollykann/pollykann.js, requires-body=true, timeout=10, tag=Pollykann 商品列表
+
+http-response ^https?:\/\/api\.pollykann\.com\/device\/veryDevice script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Pollykann/pollykann.js, requires-body=true, timeout=10, tag=Pollykann 设备验证
+
+http-response ^https?:\/\/api\.pollykann\.com\/account\/stream script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Pollykann/pollykann.js, requires-body=true, timeout=10, tag=Pollykann 账户信息
+
+http-response ^https?:\/\/api\.pollykann\.com\/appConfig\/stream script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Pollykann/pollykann.js, requires-body=true, timeout=10, tag=Pollykann App配置
+
+http-response ^https?:\/\/api\.pollykann\.com\/media script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Pollykann/pollykann.js, requires-body=true, timeout=10, tag=Pollykann 媒体
+
+[MITM]
+hostname = %APPEND% api.pollykann.com
