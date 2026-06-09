@@ -1,13 +1,6 @@
-# ABCzone (英语天天练) 会员解锁 v2.0
+# ABCzone (英语天天练) 会员解锁 - Loon 插件
 # 覆盖 Flutter + ObjC 双端 VIP 接口
 # 基于 IPA 静态分析 + 实际抓包验证
-# 
-# 安装方法：Quantumult X → 右下角三图标 → 模块 → 右上角➕ → 粘贴本链接
-#
-# 使用前请确保：
-# 1. MitM 已开启
-# 2. MitM → 主机名 中已添加下方 hostname 中的域名
-# 3. 安装后杀掉 App 重新打开
 
 [Script]
 http-response ^https?:\/\/app\.chuangjing\.com\/abc-api\/v3\/ requires-body=1,script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/ABCzone/abczone_qx.js
@@ -21,5 +14,5 @@ http-response ^https?:\/\/api\.xesvip\.cn\/ requires-body=1,script-path=https://
 http-response ^https?:\/\/bookapp\.xueersibook\.com\/ requires-body=1,script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/ABCzone/abczone_qx.js
 http-response ^https?:\/\/next-proxy\.chuangjing\.com\/ requires-body=1,script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/ABCzone/abczone_qx.js
 
-[MITM]
+[Mitm]
 hostname = app.chuangjing.com, api.xueersi.com, bookapp.xueersibook.com, api.xesvip.cn, next-proxy.chuangjing.com
