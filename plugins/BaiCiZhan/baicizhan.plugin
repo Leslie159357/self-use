@@ -1,16 +1,10 @@
 #!name=百词斩 VIP解锁
-#!desc=解锁百词斩所有VIP/会员功能
-#!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9e/78/4d/9e784d88-1644-7c09-7287-83b62e17ef6a/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.png
+#!desc=基于抓包数据，精准修改JSON接口的VIP字段，覆盖 Thrift 协议
 #!author=Leslie159357
 #!homepage=https://github.com/Leslie159357/Loon-Plugins
 
 [Script]
-http-response ^https:\/\/learn\.baicizhan\.com script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩学习
-http-response ^https:\/\/conan\.baicizhan\.com script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩业务
-http-response ^https:\/\/system\.baicizhan\.com script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩系统
-http-response ^https:\/\/try\.baicizhan\.com script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩辅助
-http-response ^https:\/\/passport\.baicizhan\.com script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩认证
-http-response ^https:\/\/du\.baicizhan\.com script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩旧API
+http-response ^https:\/\/(learn|strategy)\.baicizhan\.com\/.* script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body = true, timeout = 10, tag = 百词斩VIP
 
 [Mitm]
-hostname = learn.baicizhan.com, conan.baicizhan.com, system.baicizhan.com, try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com
+hostname = %APPEND% learn.baicizhan.com, strategy.baicizhan.com, conan.baicizhan.com, system.baicizhan.com, try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com

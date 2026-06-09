@@ -1,161 +1,183 @@
-// 百词斩 - Baicizhan VIP Unlock
-// Quantumult X / Loon 通用脚本
-// Intercept VIP membership API responses to unlock all premium features
+// 百词斩 - Baicizhan VIP Unlock v2.0
+// 基于 IPA 静态分析 + 实际抓包数据 (433_*) 编写
 // 
-// 覆盖域名:
-//   learn.baicizhan.com  - H5/支付/Mall API
-//   conan.baicizhan.com  - RPC业务API
-//   system.baicizhan.com - 系统服务
-//   try.baicizhan.com    - 辅助服务
-//   du.baicizhan.com     - 兼容老API
-//   passport.baicizhan.com - 认证
+// ⚠️ 核心发现: 百词斩主要业务API使用 Thrift 二进制协议 (application/x-thrift)
+//    MITM 无法直接修改 Thrift 二进制响应体。
+//    
+// ✅ 可拦截的 VIP JSON 接口:
+//   1. strategy.baicizhan.com/api/strategy/get_member_info_page 
+//      → 修改 payed, userVipInfo, creditNum
+//   2. learn.baicizhan.com/api/mall/proxy/virtual-currency/sell-info
+//      → 商品信息
+//   3. learn.baicizhan.com/api/mall/proxy/virtual-currency/apple/***
+//      → 苹果内购商品
+//
+//   对于 Thrift 协议接口 (user_basic_info_v2, get_payed_books 等)，
+//   需要通过 URL 重写/响应重写来修改关键的响应 Header 或触发 App 重读。
 
 const url = $request.url;
+const method = $request.method;
 const isResponse = typeof $response !== 'undefined';
 
-// 未来过期时间戳: 2099-12-31 23:59:59 UTC
-const FUTURE_TIMESTAMP = 4102444799000;
-const VIP_EXPIRE_DATE = "2099-12-31T23:59:59Z";
+// 2099-12-31 23:59:59 UTC 时间戳 (毫秒)
+const FUTURE_MS = 4102444799000;
 
 if (isResponse) {
   let body = $response.body;
+  let contentType = $response.headers?.['Content-Type'] || $response.headers?.['content-type'] || '';
   
+  // 只处理 JSON 响应，跳过 Thrift 二进制
   if (typeof body === 'string' && body.length > 0) {
     try {
       let obj = JSON.parse(body);
       let modified = false;
       
-      // ===== 递归修改所有VIP字段 =====
-      function deepModify(obj, path) {
-        if (!obj || typeof obj !== 'object') return false;
-        let changed = false;
-        
-        for (let key in obj) {
-          const val = obj[key];
-          const lowerKey = key.toLowerCase();
-          const currentPath = path ? `${path}.${key}` : key;
-          
-          // === Bool类型VIP标记 ===
-          if (lowerKey === 'isvip' || lowerKey === 'is_vip' || lowerKey === 'isv' || 
-              lowerKey === 'vip' || lowerKey === 'ispremium' || lowerKey === 'premium' ||
-              lowerKey === 'ispayed' || lowerKey === 'is_payed' || 
-              lowerKey === 'ispaid' || lowerKey === 'is_paid' ||
-              lowerKey === 'canread' || lowerKey === 'can_read' ||
-              lowerKey === 'issubscribe' || lowerKey === 'is_subscribe' ||
-              lowerKey === 'ismember' || lowerKey === 'is_member' ||
-              lowerKey === 'issvvip' || lowerKey === 'is_svvip' ||
-              lowerKey === 'issvip' || lowerKey === 'is_svip' ||
-              lowerKey === 'ismembership' || lowerKey === 'is_membership' ||
-              lowerKey === 'haspurchased' || lowerKey === 'has_purchased' ||
-              lowerKey === 'haspayed' || lowerKey === 'has_payed') {
-            if (val === false || val === 0 || val === 'false' || val === '0') {
-              obj[key] = true;
-              changed = true;
-            }
+      // ============================================================
+      // 1. get_member_info_page - 会员信息页面
+      // ============================================================
+      if (url.indexOf('/api/strategy/get_member_info_page') !== -1) {
+        if (obj.data) {
+          // 付费状态
+          if (obj.data.payed === false) {
+            obj.data.payed = true;
+            modified = true;
           }
           
-          // === Int类型VIP标记（0=普通, 1+=VIP） ===
-          if (lowerKey === 'vipstatus' || lowerKey === 'vip_status' ||
-              lowerKey === 'svipstatus' || lowerKey === 'svip_status' ||
-              lowerKey === 'membertype' || lowerKey === 'member_type' ||
-              lowerKey === 'membershiptype' || lowerKey === 'membership_type' ||
-              lowerKey === 'usertype' || lowerKey === 'user_type' ||
-              lowerKey === 'vip_level' || lowerKey === 'viplevel' ||
-              lowerKey === 'viptype' || lowerKey === 'vip_type' ||
-              lowerKey === 'vip' || lowerKey === 'v' ||  // 注意全局vip字段
-              lowerKey === 'status') {
-            if (val === 0 || val === '0' || val === 'none' || val === 'normal') {
-              obj[key] = 1;
-              changed = true;
+          // 铜板
+          if (obj.data.creditNum < 99999) {
+            obj.data.creditNum = 99999;
+            modified = true;
+          }
+          if (obj.data.getMonthCreditReward === false) {
+            obj.data.getMonthCreditReward = true;
+            modified = true;
+          }
+          if (obj.data.getTodayReward === false) {
+            obj.data.getTodayReward = true;
+            modified = true;
+          }
+          obj.data.todayRewardList = [{"type": 1, "value": 100, "desc": "Pro会员每日积分奖励"}];
+          
+          // userVipInfo - 从 null 改为 VIP 信息
+          if (obj.data.userVipInfo === null) {
+            obj.data.userVipInfo = {
+              "entitlementKey": "bcz.app.vip.v1",
+              "memberLevel": 2,
+              "expireTime": FUTURE_MS,
+              "maxValue": 99999,
+              "currentValue": 99999,
+              "nextRecoveryTime": null,
+              "nextRecoveryAmount": null,
+              "recoveryInterval": null
+            };
+            modified = true;
+          } else {
+            if (obj.data.userVipInfo.expireTime !== FUTURE_MS) {
+              obj.data.userVipInfo.expireTime = FUTURE_MS;
+              modified = true;
             }
+            obj.data.userVipInfo.memberLevel = 2;
+            obj.data.userVipInfo.maxValue = 99999;
+            obj.data.userVipInfo.currentValue = 99999;
           }
           
-          // === 过期时间 ===
-          if (lowerKey === 'vipexpire' || lowerKey === 'vip_expire' ||
-              lowerKey === 'vipexpiration' || lowerKey === 'vip_expiration' ||
-              lowerKey === 'expiretime' || lowerKey === 'expire_time' ||
-              lowerKey === 'expirationtime' || lowerKey === 'expiration_time' ||
-              lowerKey === 'vipexpiretime' || lowerKey === 'vip_expire_time' ||
-              lowerKey === 'vipexpireat' || lowerKey === 'vip_expire_at' ||
-              lowerKey === 'vipexpireatms' || lowerKey === 'vip_expire_at_ms' ||
-              lowerKey === 'vipewpendtime' || lowerKey === 'vipendtime' ||
-              lowerKey === 'vipendtime' || lowerKey === 'vip_end_time' ||
-              lowerKey === 'expirydate' || lowerKey === 'expiry_date' ||
-              lowerKey === 'expiredate' || lowerKey === 'expire_date' ||
-              lowerKey === 'membershipExpirationTime' || 
-              lowerKey === 'membershipexpirationtime' ||
-              lowerKey === 'expirationdate' || lowerKey === 'expiration_date') {
-            if (val === null || val === 0 || val === '0' || val === '' || 
-                (typeof val === 'number' && val < Date.now())) {
-              obj[key] = FUTURE_TIMESTAMP;
-              changed = true;
-            }
-          }
-          
-          // === 会员类型字符串 ===
-          if (lowerKey === 'membershiptype' || lowerKey === 'membership_type' ||
-              lowerKey === 'membertype' || lowerKey === 'member_type' ||
-              lowerKey === 'viptype' || lowerKey === 'vip_type') {
-            if (val === 'none' || val === 'normal' || val === 'free' || val === '' || val === null) {
-              obj[key] = 'vip';
-              changed = true;
-            }
-          }
-          
-          // === 试用量/配额 ===
-          if (lowerKey === 'trialremaining' || lowerKey === 'trial_remaining') {
-            if (val < 99999) {
-              obj[key] = 99999;
-              changed = true;
-            }
-          }
-          
-          // === 每日限制 ===
-          if (lowerKey === 'daynewlimit' || lowerKey === 'day_new_limit' ||
-              lowerKey === 'dailynewlimit' || lowerKey === 'daily_new_limit' ||
-              lowerKey === 'dayreviewlimit' || lowerKey === 'day_review_limit' ||
-              lowerKey === 'dailyreviewlimit' || lowerKey === 'daily_review_limit') {
-            if (val < 99999) {
-              obj[key] = 99999;
-              changed = true;
-            }
-          }
-          
-          // === 配额/能量 ===
-          if (lowerKey === 'wordenergy' || lowerKey === 'word_energy' ||
-              lowerKey === 'energy' || lowerKey === 'coin' || lowerKey === 'coins' ||
-              lowerKey === 'gold' || lowerKey === 'diamond' || lowerKey === 'gems' ||
-              lowerKey === 'availablemark' || lowerKey === 'available_mark' ||
-              lowerKey === 'freemark' || lowerKey === 'free_mark' ||
-              lowerKey === 'paidmark' || lowerKey === 'paid_mark' ||
-              lowerKey === 'studyenergy' || lowerKey === 'study_energy') {
-            if (typeof val === 'number' && val >= 0 && val < 99999) {
-              obj[key] = 99999;
-              changed = true;
-            }
-          }
-          
-          // === 递归处理对象 ===
-          if (typeof val === 'object' && val !== null) {
-            if (deepModify(val, currentPath)) {
-              changed = true;
+          // 所有商品价格改为0
+          if (obj.data.memberSaleInfoList && Array.isArray(obj.data.memberSaleInfoList)) {
+            for (var i = 0; i < obj.data.memberSaleInfoList.length; i++) {
+              var item = obj.data.memberSaleInfoList[i];
+              if (item.price !== undefined || item.originPrice !== undefined) {
+                item.price = 0;
+                item.originPrice = 0;
+                item.autoRenewal = 0;
+                if (item.tag) {
+                  var tags = item.tag.split(',,');
+                  if (tags.length >= 2) {
+                    tags[1] = "已解锁";
+                  }
+                  item.tag = tags.join(',,');
+                }
+                modified = true;
+              }
             }
           }
         }
-        return changed;
       }
       
-      // === 处理顶层data/unwrap ===
-      modified = deepModify(obj, '');
+      // ============================================================
+      // 2. 在 JSON 响应中递归修改所有 VIP 相关字段（兜底）
+      // ============================================================
+      if (!modified) {
+        modified = deepModifyVIP(obj);
+      }
       
       if (modified) {
-        $done({ body: JSON.stringify(obj) });
+        $done({body: JSON.stringify(obj)});
         return;
       }
     } catch (e) {
-      // JSON parse 失败，非JSON响应
+      // JSON parse 失败 - 非 JSON 响应或 Thrift 二进制
     }
   }
 }
 
 $done({});
+
+// ===== 递归修改VIP字段（兜底策略） =====
+function deepModifyVIP(obj) {
+  if (!obj || typeof obj !== 'object') return false;
+  let changed = false;
+  
+  for (var key in obj) {
+    var val = obj[key];
+    var lk = key.toLowerCase();
+    
+    // Bool VIP标记
+    if ((lk === 'payed' || lk === 'is_payed' || lk === 'ispayed' || 
+         lk === 'isvip' || lk === 'is_vip' ||
+         lk === 'ispremium' || lk === 'premium' ||
+         lk === 'ismember' || lk === 'is_member') &&
+        (val === false || val === 0 || val === 'false')) {
+      obj[key] = true;
+      changed = true;
+    }
+    
+    // Int VIP类型
+    else if ((lk === 'membertype' || lk === 'member_type' ||
+              lk === 'viplevel' || lk === 'vip_level' ||
+              lk === 'viptype' || lk === 'vip_type' ||
+              lk === 'vipstatus' || lk === 'vip_status') &&
+             (val === 0 || val === '0' || val === 'none')) {
+      obj[key] = 1;
+      changed = true;
+    }
+    
+    // 过期时间
+    else if ((lk === 'vipexpire' || lk === 'vip_expire' ||
+              lk === 'expiretime' || lk === 'expire_time' ||
+              lk === 'expirydate' || lk === 'expiry_date' ||
+              lk === 'expirationtime' || lk === 'expiration_time' ||
+              lk === 'vipexpireatms' || lk === 'vip_expire_at_ms' ||
+              lk === 'endtime' || lk === 'end_time') &&
+             (val === null || val === 0 || val === '0' || val === '')) {
+      obj[key] = FUTURE_MS;
+      changed = true;
+    }
+    
+    // 配额/能量
+    else if ((lk === 'creditnum' || lk === 'credit_num' ||
+              lk === 'coin' || lk === 'coins' || lk === 'gold' ||
+              lk === 'energy' || lk === 'diamond') &&
+             typeof val === 'number' && val >= 0 && val < 99999) {
+      obj[key] = 99999;
+      changed = true;
+    }
+    
+    // 递归处理子对象
+    else if (typeof val === 'object' && val !== null) {
+      if (deepModifyVIP(val)) {
+        changed = true;
+      }
+    }
+  }
+  return changed;
+}

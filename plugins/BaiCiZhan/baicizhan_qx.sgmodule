@@ -1,20 +1,15 @@
 #!name=百词斩 VIP解锁
-#!desc=解锁百词斩全部VIP/会员功能，覆盖6个域名，递归修改所有VIP字段
+#!desc=基于抓包数据，精准修改 get_member_info_page 等JSON接口的VIP字段
 #!author=Leslie159357
 #!home=https://github.com/Leslie159357/Loon-Plugins/tree/main/plugins/BaiCiZhan
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/9e/78/4d/9e784d88-1644-7c09-7287-83b62e17ef6a/AppIcon-0-0-1x_U007emarketing-0-7-0-0-85-220.png/512x512bb.png
 #!tag=unlock,教育,英语,单词
 #!system=ios
-#!date=2026-06-08
+#!date=2026-06-09
 #!version=2.0
 
 [MITM]
-hostname = %APPEND% learn.baicizhan.com, conan.baicizhan.com, system.baicizhan.com, try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com
+hostname = %APPEND% learn.baicizhan.com, strategy.baicizhan.com, conan.baicizhan.com, system.baicizhan.com, try.baicizhan.com, du.baicizhan.com, passport.baicizhan.com
 
 [Script]
-http-response ^https:\/\/learn\.baicizhan\.com script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩学习
-http-response ^https:\/\/conan\.baicizhan\.com script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩业务
-http-response ^https:\/\/system\.baicizhan\.com script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩系统
-http-response ^https:\/\/try\.baicizhan\.com script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩辅助
-http-response ^https:\/\/passport\.baicizhan\.com script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩认证
-http-response ^https:\/\/du\.baicizhan\.com script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩旧API
+http-response ^https:\/\/(learn|strategy)\.baicizhan\.com\/.* script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/BaiCiZhan/baicizhan_qx.js, requires-body=true, timeout=10, tag=百词斩VIP
