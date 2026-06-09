@@ -1,6 +1,5 @@
-# ABCzone (英语天天练) 会员解锁 - Loon 插件
-# 覆盖 Flutter + ObjC 双端 VIP 接口
-# 基于 IPA 静态分析 + 实际抓包验证
+# ABCzone (英语天天练) 会员解锁 v2.1 - Loon 插件
+# v2.1: 修复剑桥收费弹窗 — 修改到期时间 + 清空独立课程列表
 
 [Script]
 http-response ^https?:\/\/app\.chuangjing\.com\/abc-api\/v3\/ requires-body=1,script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/ABCzone/abczone_qx.js

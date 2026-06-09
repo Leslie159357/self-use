@@ -1,13 +1,13 @@
-# ABCzone (英语天天练) 会员解锁 v2.0
+# ABCzone (英语天天练) 会员解锁 v2.1
 # 覆盖 Flutter + ObjC 双端 VIP 接口
-# 基于 IPA 静态分析 + 实际抓包验证
-# 
+# v2.1: 修复剑桥收费弹窗 — 修改 vip_end_uts/svip_end_uts 到期时间 + 清空独立课程列表
 # 安装方法：Quantumult X → 右下角三图标 → 模块 → 右上角➕ → 粘贴本链接
 #
 # 使用前请确保：
 # 1. MitM 已开启
 # 2. MitM → 主机名 中已添加下方 hostname 中的域名
 # 3. 安装后杀掉 App 重新打开
+# 4. 抓包验证是否生效（确保能看到 replace_response_body 有数据）
 
 [Script]
 http-response ^https?:\/\/app\.chuangjing\.com\/abc-api\/v3\/ requires-body=1,script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/ABCzone/abczone_qx.js
