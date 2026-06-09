@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ABCzone (英语天天练) 会员解锁 v2.1
 // @namespace    https://github.com/Leslie159357/Loon-Plugins
-// @version      2.4
+// @version      2.5
 // @description  破解学而思英语天天练 VIP/SVIP + 剑桥收费 — 基于实际抓包数据修复
 // @author       Leslie159357
 // @mitm         app.chuangjing.com, api.xueersi.com, bookapp.xueersibook.com, api.xesvip.cn
@@ -257,6 +257,19 @@ if (url.includes('/abc-api/v3/camb/get-practice-list') && body.data) {
 
 // 执行递归泛匹配
 unlockVIP(body);
+
+// 12. svip/expansion-source/get-video-play-url — 服务端返回 "非SVIP用户不可访问"
+// 需要伪造一个成功的播放URL响应
+if (url.includes('/abc-api/v3/svip/expansion-source/get-video-play-url')) {
+    // 原响应 stat:0, 无法直接使用，需要伪造
+    body.stat = 1;
+    body.code = 0;
+    body.msg = 'success';
+    if (!body.data) body.data = {};
+    body.data.play_url = '';
+    body.data.duration = 0;
+    log.push('🎯 svip/get-video-play-url: 伪造成功响应');
+}
 
 // 输出日志（精简）
 console.log('ABCzone v2.1: ' + log.join(' | '));
