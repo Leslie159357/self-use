@@ -1,287 +1,264 @@
 // ==ClosureCopy==
 // ==/ClosureCopy==
 
-// Trancy MITM Plugin v1.1 - 针对 RevenueCat 响应体精确修改
-// MITM Domain: api.revenuecat.com, api.rc-backup.com, api-paywalls.revenuecat.com, api.trancy.org
-// 
-// RevenueCat API 典型响应结构:
-// GET /v1/subscribers/{appUserId}
-// {
-//   "request_date": "...",
-//   "request_date_ms": 123456789,
-//   "subscriber": {
-//     "entitlements": {
-//       "pro": {          // <-- entitlement identifier，通常是 "pro" 或 "premium"
-//         "expires_date": "2024-01-01T00:00:00Z",
-//         "product_identifier": "com.trancy.app_yearly",
-//         "purchase_date": "...",
-//         "is_active": true,
-//         "will_renew": true,
-//         "period_type": "active",
-//         "store": "app_store"
-//       }
-//     },
-//     "subscriptions": {
-//       "com.trancy.app_yearly": {
-//         "expires_date": "...",
-//         "is_active": true,
-//         "will_renew": true
-//       }
-//     },
-//     "non_subscriptions": {},
-//     "first_seen": "...",
-//     "original_application_version": "1.0",
-//     "original_purchase_date": "...",
-//     "management_url": "https://apps.apple.com/account/subscriptions"
-//   }
-// }
+// Trancy MITM Plugin v2.0 - 基于抓包数据精准修复
+// MITM Domain: api.trancy.org, service.trancy.org, api.revenuecat.com, api.rc-backup.com, api-paywalls.revenuecat.com
+//
+// 从抓包确认的关键接口：
+// 1. api.trancy.org/1/user/profile?includeQuota=1  — premium: false, AIEngineActive: false, stripePremiumActive: null
+// 2. service.trancy.org/1/user/profile  — premium: false, subscription: null, AIEngineActive: false
+// 3. api.rc-backup.com/v1/subscribers/{id}/offerings  — RevenueCat 产品列表（无需修改，用于显示）
 
-const VERSION = "1.1";
-
-const CONFIG = {
-  futureExpiry: "2099-12-31T23:59:59Z",
-  futureExpiryMs: 4092599349000,
-  
-  // Trancy 的 RevenueCat 产品 ID（从 StoreKit 配置中提取）
-  productIdentifiers: [
-    "com.trancy.app_monthly",
-    "com.trancy.app_yearly",
-    "com.trancy.app_ai_monthly",
-    "com.trancy.app_ai_yearly"
-  ],
-  
-  // 可能的 entitlement identifier（Trancy 使用的）
-  possibleEntitlements: ["pro", "premium", "plus", "all_access"]
-};
-
-function processRevenueCatResponse(body) {
-  // 确保 subscriber 字段存在
-  if (!body.subscriber) {
-    body.subscriber = {};
-  }
-  
-  const subscriber = body.subscriber;
-  
-  // ===== 1. 创建/修改 entitlements =====
-  if (!subscriber.entitlements) {
-    subscriber.entitlements = {};
-  }
-  
-  // 为每个可能的 entitlement ID 创建活跃条目
-  for (const entId of CONFIG.possibleEntitlements) {
-    if (!subscriber.entitlements[entId]) {
-      subscriber.entitlements[entId] = {};
-    }
-    
-    const entitlement = subscriber.entitlements[entId];
-    if (typeof entitlement === 'object' && !Array.isArray(entitlement)) {
-      // 用第一个产品 ID 作为默认
-      const defaultProductId = CONFIG.productIdentifiers[1]; // yearly
-      
-      subscriber.entitlements[entId] = {
-        ...entitlement,
-        expires_date: CONFIG.futureExpiry,
-        purchase_date: "2024-06-10T00:00:00Z",
-        product_identifier: entitlement.product_identifier || defaultProductId,
-        latest_purchase_date: entitlement.latest_purchase_date || "2024-06-10T00:00:00Z",
-        is_active: true,
-        will_renew: true,
-        is_sandbox: false,
-        ownership_type: "PURCHASED",
-        store: "app_store",
-        period_type: "active",
-        original_purchase_date: entitlement.original_purchase_date || "2024-01-01T00:00:00Z",
-        grace_period_expires_date: null,
-        unsubscribe_detected_at: null,
-        billing_issues_detected_at: null,
-        refund_reason: null
-      };
-    }
-  }
-  
-  // 移除现有的 sandbox/sandbox_entitlements 等干扰项
-  delete subscriber.sandbox_entitlements;
-  delete subscriber.sandbox_entitlements_verification;
-  
-  // ===== 2. 创建/修改 subscriptions =====
-  if (!subscriber.subscriptions) {
-    subscriber.subscriptions = {};
-  }
-  
-  for (const pid of CONFIG.productIdentifiers) {
-    if (!subscriber.subscriptions[pid]) {
-      subscriber.subscriptions[pid] = {};
-    }
-    
-    const sub = subscriber.subscriptions[pid];
-    if (typeof sub === 'object' && !Array.isArray(sub)) {
-      subscriber.subscriptions[pid] = {
-        ...sub,
-        expires_date: CONFIG.futureExpiry,
-        purchase_date: sub.purchase_date || "2024-06-10T00:00:00Z",
-        original_purchase_date: sub.original_purchase_date || "2024-01-01T00:00:00Z",
-        latest_purchase_date: sub.latest_purchase_date || "2024-06-10T00:00:00Z",
-        is_active: true,
-        will_renew: true,
-        is_sandbox: false,
-        auto_resume_date: null,
-        unsubscribe_detected_at: null,
-        billing_issues_detected_at: null,
-        period_type: "active",
-        store: "app_store",
-        ownership_type: "PURCHASED"
-      };
-    }
-  }
-  
-  // ===== 3. 修改 non_subscriptions =====
-  if (!subscriber.non_subscriptions) {
-    subscriber.non_subscriptions = {};
-  }
-  
-  // ===== 4. 修改 subscriber 顶层字段 =====
-  subscriber.first_seen = subscriber.first_seen || "2024-01-01T00:00:00Z";
-  subscriber.original_application_version = subscriber.original_application_version || "1.0";
-  subscriber.original_purchase_date = subscriber.original_purchase_date || "2024-01-01T00:00:00Z";
-  subscriber.management_url = "https://apps.apple.com/account/subscriptions";
-  subscriber.latest_expiration_date = CONFIG.futureExpiry;
-  subscriber.entitlements = subscriber.entitlements; // ensure it's set
-  
-  // ===== 5. 修改顶层 request_date =====
-  body.request_date = CONFIG.futureExpiry;
-  body.request_date_ms = String(CONFIG.futureExpiryMs);
-  
-  return body;
-}
-
-function processTrancyAPI(body) {
-  // Trancy 自有 API 响应处理
-  // api.trancy.org 的 JSON 响应
-  
-  // 递归修改所有布尔型 VIP 字段
-  function recursiveModify(obj, depth) {
-    if (depth > 15 || obj === null || obj === undefined || typeof obj !== 'object') return obj;
-    
-    if (!Array.isArray(obj)) {
-      // 对象处理
-      for (const key of Object.keys(obj)) {
-        const val = obj[key];
-        const lk = key.toLowerCase();
-        
-        // 布尔型 VIP 字段
-        if (typeof val === 'boolean') {
-          if (/^is(pro|premium|vip|member|subscribed|active|entitled|purchased|paid|svip|gold|plus|promember|premiummember|verified|enabled|featured|allow|allowed|accessible|unlocked)/.test(lk)) {
-            obj[key] = true;
-          }
-          if (/^is(trial|canceled|cancelled|pending|sandbox|expired|frozen|limited|blocked|restricted)/.test(lk)) {
-            obj[key] = false;
-          }
-          // show/hide VIP elements
-          if (lk === 'showvip' || lk === 'showpremium' || lk === 'showpaywall' || lk === 'showads') {
-            obj[key] = false;
-          }
-          if (lk === 'vipelements'hidden' || lk === 'viphidden') {
-            obj[key] = true;
-          }
-        }
-        
-        // 数字型字段
-        if (typeof val === 'number') {
-          if (/^(vip|svip|sub|tier|level|member|plan)(status|level|tier|rank)?$/.test(lk)) {
-            obj[key] = Math.max(val, 999);
-          }
-          if (/^(vip|svip|expire|expir|end|trial)(time|date|uts|at|end)?$/.test(lk) || 
-              /(expires|expirydate|expiration|enduts)$/.test(lk)) {
-            obj[key] = CONFIG.futureExpiryMs;
-          }
-          if (/^(balance|credit|point|coin|token|quota|limit|remain|count|total)(s|ed)?$/.test(lk)) {
-            obj[key] = Math.max(val, 999999);
-          }
-        }
-        
-        // 字符串型字段
-        if (typeof val === 'string') {
-          if (/^(status|plan|tier|level|type|membertype|usertype|entitlement|role)$/.test(lk)) {
-            const vl = val.toLowerCase();
-            if (vl === 'free' || vl === 'basic' || vl === 'trial' || 
-                vl === 'expired' || vl === 'inactive' || vl === 'none' ||
-                vl === 'standard' || vl === 'limited') {
-              obj[key] = 'premium';
-            }
-          }
-          if (/^(producttier|subscriptiontier)$/.test(lk)) {
-            if (val.toLowerCase() === 'free' || val.toLowerCase() === 'basic') {
-              obj[key] = 'premium';
-            }
-          }
-          if (/^(expires|expiry|expiration|expiresdate|expirydate)$/.test(lk) ||
-              /(expiresdate|expirydate)$/.test(lk)) {
-            obj[key] = CONFIG.futureExpiry;
-          }
-        }
-        
-        // 递归
-        if (obj[key] && typeof obj[key] === 'object') {
-          recursiveModify(obj[key], depth + 1);
-        }
-      }
-    } else {
-      // 数组处理
-      for (let i = 0; i < obj.length; i++) {
-        if (obj[i] && typeof obj[i] === 'object') {
-          recursiveModify(obj[i], depth + 1);
-        }
-      }
-    }
-    
-    return obj;
-  }
-  
-  return recursiveModify(body, 0);
-}
+const VERSION = "2.0";
 
 function main() {
   const url = $request.url;
-  const isRevenueCat = /api\.revenuecat\.com|api\.rc-backup\.com|api-paywalls\.revenuecat\.com/.test(url);
-  const isTrancyAPI = /api\.trancy\.org/.test(url);
-  
-  // 只处理 URL 匹配的请求
-  if (!isRevenueCat && !isTrancyAPI) {
-    $done({});
-    return;
-  }
+  const pathAndQuery = url.replace(/^https?:\/\/[^\/]+/, '');
   
   // 只处理 JSON 响应
-  const contentType = ($response.headers['Content-Type'] || $response.headers['content-type'] || '').toLowerCase();
-  if (!contentType.includes('json')) {
+  const ct = ($response.headers['Content-Type'] || ($response.headers['content-type'] || '')).toLowerCase();
+  if (!ct.includes('json')) {
     $done({});
     return;
   }
   
   let body;
   try {
-    body = typeof $response.body === 'string' ? JSON.parse($response.body) : JSON.parse($response.body.toString());
+    body = JSON.parse(typeof $response.body === 'string' ? $response.body : $response.body.toString());
   } catch (e) {
     $done({});
     return;
   }
   
-  console.log(`[Trancy] Processing ${isRevenueCat ? 'RevenueCat' : 'Trancy'} response from: ${url}`);
-  
-  try {
-    if (isRevenueCat) {
-      body = processRevenueCatResponse(body);
-      console.log('[Trancy] RevenueCat response modified successfully');
-    } else if (isTrancyAPI) {
-      body = processTrancyAPI(body);
-      console.log('[Trancy] Trancy API response modified successfully');
+  // ======= api.trancy.org/1/user/profile 响应 =======
+  if (/api\.trancy\.org\/1\/user\/profile/.test(url) && body.data) {
+    console.log('[Trancy] Modifying api.trancy.org/1/user/profile');
+    const data = body.data;
+    
+    // VIP 核心字段
+    data.premium = true;
+    data.stripePremiumActive = true;
+    data.stripeAIEngineActive = true;
+    data.subscription = "premium";
+    data.AIEngineActive = true;
+    data.plan = "premium";
+    data.tier = "premium";
+    data.isPro = true;
+    data.isPremium = true;
+    data.pro = true;
+    
+    // 额度
+    if (data.quota) {
+      if (data.quota.AIEngineBill) {
+        data.quota.AIEngineBill.balance = 999999;
+        data.quota.AIEngineBill.cost = 0;
+        data.quota.AIEngineBill.amount = 999999;
+        data.quota.AIEngineBill.OpenAI = 999999;
+        data.quota.AIEngineBill.Anthropic = 999999;
+        data.quota.AIEngineBill.DeepL = 999999;
+        data.quota.AIEngineBill.Google = 999999;
+        data.quota.AIEngineBill.DeepSeek = 999999;
+        data.quota.AIEngineBill.Meta = 999999;
+        data.quota.AIEngineBill.GLM = 999999;
+        data.quota.AIEngineBill.tokens = 999999;
+        data.quota.AIEngineBill.AIEngineExpired = 9999999999999;
+        data.quota.AIEngineBill.premiumExpired = 9999999999999;
+      }
+      if (data.quota.AITokens) {
+        data.quota.AITokens.used = 0;
+        data.quota.AITokens.limit = 999999;
+      }
+      if (data.quota.whisperx) {
+        data.quota.whisperx.used = 0;
+        data.quota.whisperx.limit = 999999;
+      }
+      if (data.quota.pdf) {
+        data.quota.pdf.used = 0;
+        data.quota.pdf.limit = 999999;
+      }
     }
-  } catch (e) {
-    console.log(`[Trancy] Error: ${e.message}`);
-    $done({});
+    
+    body.message = "ok";
+    $done({ body: JSON.stringify(body) });
     return;
   }
   
+  // ======= service.trancy.org/1/user/profile 响应 =======
+  if (/service\.trancy\.org\/1\/user\/profile/.test(url) && body.data) {
+    console.log('[Trancy] Modifying service.trancy.org/1/user/profile');
+    const data = body.data;
+    
+    // VIP 核心字段
+    data.premium = true;
+    data.stripePremiumActive = true;
+    data.stripeAIEngineActive = true;
+    data.subscription = "premium";
+    data.AIEngineActive = true;
+    data.plan = "premium";
+    data.tier = "premium";
+    data.isPro = true;
+    data.isPremium = true;
+    data.pro = true;
+    
+    // 额度
+    if (data.quota) {
+      if (data.quota.AIEngineBill) {
+        data.quota.AIEngineBill.balance = 999999;
+        data.quota.AIEngineBill.cost = 0;
+        data.quota.AIEngineBill.amount = 999999;
+        data.quota.AIEngineBill.OpenAI = 999999;
+        data.quota.AIEngineBill.Anthropic = 999999;
+        data.quota.AIEngineBill.DeepL = 999999;
+        data.quota.AIEngineBill.Google = 999999;
+        data.quota.AIEngineBill.DeepSeek = 999999;
+        data.quota.AIEngineBill.Meta = 999999;
+        data.quota.AIEngineBill.GLM = 999999;
+        data.quota.AIEngineBill.tokens = 999999;
+        data.quota.AIEngineBill.AIEngineExpired = 9999999999999;
+        data.quota.AIEngineBill.premiumExpired = 9999999999999;
+      }
+      if (data.quota.AITokens) {
+        data.quota.AITokens.used = 0;
+        data.quota.AITokens.limit = 999999;
+      }
+      if (data.quota.whisperx) {
+        data.quota.whisperx.used = 0;
+        data.quota.whisperx.limit = 999999;
+      }
+      if (data.quota.pdf) {
+        data.quota.pdf.used = 0;
+        data.quota.pdf.limit = 999999;
+      }
+    }
+    
+    body.message = "ok";
+    $done({ body: JSON.stringify(body) });
+    return;
+  }
+  
+  // ======= RevenueCat 响应（offerings/subscribers） =======
+  if (/api\.revenuecat\.com|api\.rc-backup\.com|api-paywalls\.revenuecat\.com/.test(url)) {
+    console.log('[Trancy] Modifying RevenueCat response');
+    
+    if (body.subscriber) {
+      const sub = body.subscriber;
+      
+      // 确保 entitlements 存在
+      if (!sub.entitlements) sub.entitlements = {};
+      
+      // 创建完整 entitlement
+      for (const entId of ["pro", "premium", "plus", "all_access"]) {
+        if (!sub.entitlements[entId]) sub.entitlements[entId] = {};
+        sub.entitlements[entId] = {
+          ...sub.entitlements[entId],
+          expires_date: "2099-12-31T23:59:59Z",
+          purchase_date: "2024-06-10T00:00:00Z",
+          latest_purchase_date: "2024-06-10T00:00:00Z",
+          product_identifier: sub.entitlements[entId]?.product_identifier || "com.trancy.app_yearly",
+          is_active: true,
+          will_renew: true,
+          is_sandbox: false,
+          ownership_type: "PURCHASED",
+          store: "app_store",
+          period_type: "active",
+          original_purchase_date: "2024-01-01T00:00:00Z",
+          unsubscribe_detected_at: null,
+          billing_issues_detected_at: null,
+          grace_period_expires_date: null,
+          refund_reason: null
+        };
+      }
+      
+      // 订阅
+      if (!sub.subscriptions) sub.subscriptions = {};
+      for (const pid of ["com.trancy.app_monthly", "com.trancy.app_yearly", "com.trancy.app_ai_monthly", "com.trancy.app_ai_yearly"]) {
+        if (!sub.subscriptions[pid]) sub.subscriptions[pid] = {};
+        sub.subscriptions[pid] = {
+          ...sub.subscriptions[pid],
+          expires_date: "2099-12-31T23:59:59Z",
+          purchase_date: sub.subscriptions[pid]?.purchase_date || "2024-06-10T00:00:00Z",
+          original_purchase_date: sub.subscriptions[pid]?.original_purchase_date || "2024-01-01T00:00:00Z",
+          is_active: true,
+          will_renew: true,
+          is_sandbox: false,
+          period_type: "active",
+          store: "app_store",
+          ownership_type: "PURCHASED",
+          unsubscribe_detected_at: null,
+          billing_issues_detected_at: null
+        };
+      }
+      
+      // 顶层字段
+      sub.first_seen = sub.first_seen || "2024-01-01T00:00:00Z";
+      sub.original_application_version = "1.0";
+      sub.original_purchase_date = "2024-01-01T00:00:00Z";
+      sub.management_url = "https://apps.apple.com/account/subscriptions";
+      
+      body.request_date = "2099-12-31T23:59:59Z";
+      body.request_date_ms = "4092599349000";
+    }
+    
+    $done({ body: JSON.stringify(body) });
+    return;
+  }
+  
+  // ======= 通用递归修改（兜底） =======
+  console.log('[Trancy] Applying generic modify for: ' + pathAndQuery);
+  
+  function deepModify(obj, depth) {
+    if (depth > 15 || !obj || typeof obj !== 'object') return;
+    
+    if (!Array.isArray(obj)) {
+      for (const key of Object.keys(obj)) {
+        const val = obj[key];
+        const lk = key.toLowerCase();
+        
+        // 布尔字段
+        if (typeof val === 'boolean') {
+          if (/^(is)?(pro|premium|vip|member|subscribed|paid|active|entitled|enabled|unlocked|svip|plus|gold|promember)/.test(lk)) {
+            obj[key] = true;
+          }
+          if (/^(is)?(trial|canceled|expired|limited|blocked|sandbox)/.test(lk)) {
+            obj[key] = false;
+          }
+        }
+        
+        // 数字字段
+        if (typeof val === 'number') {
+          if (/(balance|credit|quota|limit|token|point|coin)/i.test(lk)) {
+            if (val === 0 || lk.includes('balance') || lk.includes('limit')) {
+              obj[key] = 999999;
+            }
+          }
+          if (/(expire|end|expir)/i.test(lk) && val === 0) {
+            obj[key] = 9999999999999;
+          }
+          if (/(status|tier|level)/i.test(lk) && (val === 0 || val === 1 || val === 2)) {
+            obj[key] = 999;
+          }
+        }
+        
+        // 字符串字段
+        if (typeof val === 'string') {
+          if (/(status|plan|tier|type|role|entitlement)/i.test(lk)) {
+            const vl = val.toLowerCase();
+            if (/^(free|basic|trial|expired|inactive|none|standard|limited)$/.test(vl)) {
+              obj[key] = 'premium';
+            }
+          }
+        }
+        
+        if (obj[key] && typeof obj[key] === 'object') deepModify(obj[key], depth + 1);
+      }
+    } else {
+      for (const item of obj) {
+        if (item && typeof item === 'object') deepModify(item, depth + 1);
+      }
+    }
+  }
+  
+  deepModify(body, 0);
   $done({ body: JSON.stringify(body) });
 }
 

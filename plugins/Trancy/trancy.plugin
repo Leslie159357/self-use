@@ -1,16 +1,17 @@
 #!name=Trancy Premium
-#!desc=解锁 Trancy Premium + AI 会员（MITM 方案 v1.1）
+#!desc=解锁 Trancy Premium + AI 会员 v2.0（基于抓包数据精准修复）
 #!author=Minis
 #!home=https://github.com/Leslie159357/Loon-Plugins
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/5b/6b/4d/5b6b4de6-6f46-6f42-3eac-6b24736b0f23/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-1-0-0-0-0.png/512x512bb.png
-#!version=1.1
+#!version=2.0
 #!date=2026-06-11
 
 [Script]
-http-response ^https?://api\.trancy\.org/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=Trancy API
-http-response ^https?://api\.revenuecat\.com/v1/(subscribers|products|offerings) script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=RevenueCat API
-http-response ^https?://api\.rc-backup\.com/v1/(subscribers|products|offerings) script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=RevenueCat Backup
+http-response ^https?://api\.trancy\.org/1/user/profile script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=Trancy API - User Profile
+http-response ^https?://service\.trancy\.org/1/user/profile script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=Service API - User Profile
+http-response ^https?://api\.revenuecat\.com/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=RevenueCat API
+http-response ^https?://api\.rc-backup\.com/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=RevenueCat Backup
 http-response ^https?://api-paywalls\.revenuecat\.com/ script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Trancy/trancy_mitm.js, requires-body=true, timeout=10, tag=RevenueCat Paywalls
 
 [MITM]
-hostname = api.trancy.org, api.revenuecat.com, api.rc-backup.com, api-paywalls.revenuecat.com
+hostname = api.trancy.org, service.trancy.org, api.revenuecat.com, api.rc-backup.com, api-paywalls.revenuecat.com
