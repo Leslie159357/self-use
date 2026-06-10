@@ -1,16 +1,13 @@
-// LingoQ VIP Unlock - MITM Script v2.1
+// LingoQ VIP Unlock - MITM Script v2.2
 // QX & Loon 通用
-// 基于抓包数据: 修复盗版提示+字幕劫持
+// 基于抓包数据: 修复SSE流截断问题，保留字幕拦截
 // Bundle ID: com.lingoq.ios.lingeqi
 
 // =============================================
 // 配置区
 // =============================================
 
-// 空字幕内容（替换掉服务端下发的盗版提示字幕）
-const EMPTY_SUBTITLE = '{"sentences":[]}';
-
-// VIP 字段配置
+// VIP 字段配置（基于实际抓包验证）
 const VIP_CONFIG = {
     // VIP 核心字段（来自 /usercenter-facade-app-prod/users/index）
     vip: true,
@@ -72,15 +69,6 @@ const VIP_CONFIG = {
     payed: true,
     purchased: true,
     
-    // 商品相关
-    isFree: true,
-    is_free: true,
-    price: 0,
-    priceOrigin: 0,
-    price_origin: 0,
-    originalPrice: 0,
-    original_price: 0,
-    
     // 其他
     isTrial: false,
     is_trial: false,
@@ -116,11 +104,6 @@ const VIP_CONFIG = {
     signInDays: 999,
 };
 
-// 需要特殊处理的路径（直接透传）
-const PASSTHROUGH_PATHS = [
-    '.m3u8', '.ts', '.jpg', '.png', '.gif', '.wav', '.mp3',
-];
-
 // VIP相关Key名（递归匹配用）
 const VIP_KEYS = [
     'vip', 'member', 'subscription', 'premium', 'pro', 'subscriber',
@@ -138,9 +121,33 @@ const VIP_KEYS = [
     'signInDays', 'sign_in_days',
 ];
 
+// SSE 流接口（直接透传，不尝试解析 JSON）
+const SSE_PATHS = [
+    'stream/video/chat',
+];
+
+// 需要透传的静态资源
+const PASSTHROUGH_EXTENSIONS = [
+    '.m3u8', '.ts', '.jpg', '.png', '.gif', '.wav', '.mp3',
+];
+
 // =============================================
 // 核心逻辑
 // =============================================
+
+function isSSE(url) {
+    for (const p of SSE_PATHS) {
+        if (url.includes(p)) return true;
+    }
+    return false;
+}
+
+function isPassthrough(url) {
+    for (const ext of PASSTHROUGH_EXTENSIONS) {
+        if (url.includes(ext)) return true;
+    }
+    return false;
+}
 
 function recursiveModify(obj, path = '') {
     if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
@@ -163,9 +170,9 @@ function recursiveModify(obj, path = '') {
             continue;
         }
         
-        // 拦截 subtitleUrl - 替换盗版提示字幕
-        if (keyLower === 'subtitleurl' && typeof val === 'string' && val.includes('oss.lingoq.com/video-subtitle/')) {
-            obj[key] = '';  // 清空字幕URL，阻止盗版提示字幕加载
+        // 拦截 subtitleUrl - 阻止盗版提示字幕加载
+        if (keyLower === 'subtitleurl' && typeof val === 'string' && val.includes('video-subtitle/')) {
+            obj[key] = '';
             continue;
         }
         
@@ -201,19 +208,18 @@ function recursiveModify(obj, path = '') {
     return obj;
 }
 
-function shouldPassthrough(url) {
-    for (const ext of PASSTHROUGH_PATHS) {
-        if (url.includes(ext)) return true;
-    }
-    return false;
-}
-
 // QX/Loon hook: 响应拦截
 if (typeof $response !== 'undefined' && $response.body) {
     const url = $request.url || '';
     
-    // 透传非 JSON 资源
-    if (shouldPassthrough(url)) {
+    // SSE 流接口直接透传，不处理
+    if (isSSE(url)) {
+        $done({});
+        return;
+    }
+    
+    // 静态资源透传
+    if (isPassthrough(url)) {
         $done({});
         return;
     }
