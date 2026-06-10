@@ -1,18 +1,25 @@
-// LingoQ VIP Unlock - MITM Script
+// LingoQ VIP Unlock - MITM Script v2.0
 // QX & Loon 通用
-// 基于 IPA v2.2.0 (build 2026051501) 静态分析
+// 基于抓包验证的实际 API 结构
 // Bundle ID: com.lingoq.ios.lingeqi
 
 // =============================================
-// 配置区 - 如需修改可在此调整
+// 配置区 - 基于实际抓包数据
 // =============================================
 
-// 强制 VIP 字段值
 const VIP_CONFIG = {
+    // VIP 核心字段（来自 /usercenter-facade-app-prod/users/index）
+    vip: true,
+    lifetimeVip: true,
+    vipLeftDays: 99999,
+    
+    // 试用/播放权限（来自 video/player/info 等）
+    trialState: 1,
+    videoState: 1,
+    
     // 订阅/会员状态
     isVip: true,
     is_vip: true,
-    vip: true,
     vipStatus: 1,
     vip_status: 1,
     memberStatus: 1,
@@ -106,7 +113,13 @@ const VIP_CONFIG = {
     energy: 999999,
     star: 999999,
     stars: 999999,
+    signInDays: 999,
 };
+
+// 需要特殊处理的路径（不进行修改直接透传）
+const PASSTHROUGH_PATHS = [
+    '.m3u8', '.ts', '.jpg', '.png', '.json', '.wav', '.mp3', '.gif',
+];
 
 // VIP相关Key名（递归匹配用）
 const VIP_KEYS = [
@@ -122,26 +135,17 @@ const VIP_KEYS = [
     'apple_order', 'appleOrder',
     'receipt', 'verify',
     'codeRedemption', 'redemption',
+    'signInDays', 'sign_in_days',
 ];
 
-// 需要拦截的路径关键词
-const TARGET_PATHS = [
-    'checkUserIsVipUrl', 'checkUserAppleOrder', 'verifyAppleReceipt',
-    'goods/vip/ios', 'vip/subscribe', 'vip/actions/balance',
-    'vip/rightsAndInterests', 'codeRedemption',
-    'user/info', 'user/detail', 'user/profile',
-    'member', 'subscription', 'subscribe',
+// 需要被清空的弹窗/Popup 字段
+const EMPTY_FIELDS = [
+    'popup_info', 'popupPoints', 'popupPointSize',
 ];
 
 // =============================================
 // 核心逻辑
 // =============================================
-
-function shouldIntercept(url) {
-    // 对 gate.lingoq.com 的所有请求都拦截
-    // 默认拦截所有请求（由 hostname 过滤）
-    return true;
-}
 
 function recursiveModify(obj, path = '') {
     if (obj === null || obj === undefined || typeof obj !== 'object') return obj;
@@ -158,10 +162,21 @@ function recursiveModify(obj, path = '') {
         const currentPath = path ? path + '.' + key : key;
         const keyLower = key.toLowerCase();
         
-        // 检查是否匹配VIP配置
+        // 检查是否匹配VIP配置（精确匹配优先）
         if (VIP_CONFIG.hasOwnProperty(key)) {
-            console.log('[LingoQ] ✅ 修改: ' + currentPath + ' = ' + JSON.stringify(VIP_CONFIG[key]));
             obj[key] = VIP_CONFIG[key];
+            continue;
+        }
+        
+        // 清除弹窗/弹出点
+        if (EMPTY_FIELDS.includes(key)) {
+            if (typeof val === 'number') {
+                obj[key] = 0;
+            } else if (Array.isArray(val)) {
+                obj[key] = [];
+            } else if (typeof val === 'object') {
+                obj[key] = {};
+            }
             continue;
         }
         
@@ -170,10 +185,8 @@ function recursiveModify(obj, path = '') {
             for (const vipKey of VIP_KEYS) {
                 if (keyLower.includes(vipKey.toLowerCase())) {
                     if (typeof val === 'boolean') {
-                        console.log('[LingoQ] ✅ 泛匹配布尔: ' + currentPath + ' = true');
                         obj[key] = true;
                     } else if (typeof val === 'number') {
-                        console.log('[LingoQ] ✅ 泛匹配数字: ' + currentPath + ' = 1');
                         obj[key] = 1;
                     }
                     break;
@@ -185,7 +198,6 @@ function recursiveModify(obj, path = '') {
         if (val === 0 && typeof val === 'number') {
             for (const balKey of ['balance', 'credit', 'coin', 'gem', 'diamond', 'trophy', 'flower', 'heart', 'energy', 'star', 'point', 'score']) {
                 if (keyLower.includes(balKey)) {
-                    console.log('[LingoQ] ✅ 泛匹配余额: ' + currentPath + ' = 999999');
                     obj[key] = 999999;
                     break;
                 }
@@ -200,24 +212,33 @@ function recursiveModify(obj, path = '') {
     return obj;
 }
 
-// QX hook: 响应拦截
+function shouldPassthrough(url) {
+    for (const ext of PASSTHROUGH_PATHS) {
+        if (url.includes(ext)) return true;
+    }
+    return false;
+}
+
+// QX/Loon hook: 响应拦截
 if (typeof $response !== 'undefined' && $response.body) {
+    const url = $request.url || '';
+    
+    // 透传非 JSON 资源
+    if (shouldPassthrough(url)) {
+        $done({});
+        return;
+    }
+    
     try {
         let body = JSON.parse($response.body);
         if (typeof body === 'object') {
-            const url = $request.url || '';
-            console.log('[LingoQ] 拦截: ' + url);
-            if (!shouldIntercept(url)) {
-                $done({});
-                return;
-            }
             body = recursiveModify(body);
             $done({ body: JSON.stringify(body) });
         } else {
             $done({});
         }
     } catch (e) {
-        console.log('[LingoQ] JSON解析失败: ' + e);
+        // 非 JSON 响应直接透传
         $done({});
     }
 } else {
