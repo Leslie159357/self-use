@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TingDianDian Pro Unlock
 // @namespace    https://github.com/Leslie159357/Loon-Plugins
-// @version      1.1.0
+// @version      1.2.0
 // @description  听点点 - 解锁所有Pro/Permanent会员功能（基于实际抓包修复）
 // @author       Leslie159357
 // @license      MIT
@@ -252,6 +252,49 @@ try {
   if (path.indexOf('subscriptions/list') !== -1) {
     modified.data = [];
     log('✅ subscriptions/list 清空订阅限制');
+  }
+  
+  // ===== transcript/create - 创建转录 =====
+  if (path === 'transcript/create') {
+    if (modified.success === false || !modified.success) {
+      // 服务端拒绝（额度不足），伪造成功响应
+      // 从请求URL提取参数
+      modified.success = true;
+      delete modified.message;
+      modified.data = {
+        id: Math.floor(Math.random() * 90000 + 10000),
+        collectionId: null,
+        contentSourceId: 5140,
+        contentEpisodeId: 0,
+        userId: 'd6z7qikngvt2mxas',
+        name: 'Transcription',
+        basePath: '',
+        status: 'RUNNING',
+        languageHints: ['en'],
+        type: 'video',
+        order: null,
+        error: null,
+        latest: true,
+        subtitleMasks: null,
+        showSubtitleMask: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      log('✅ transcript/create 强制改为成功');
+    }
+  }
+  
+  // ===== transcript/statuses =====
+  if (path.indexOf('transcript/statuses') !== -1) {
+    if (modified.data && Array.isArray(modified.data)) {
+      for (let i = 0; i < modified.data.length; i++) {
+        if (modified.data[i].error) {
+          log('❌ transcript/statuses 有错误: ' + modified.data[i].error);
+          modified.data[i].status = 'SUCCEEDED';
+          modified.data[i].error = null;
+        }
+      }
+    }
   }
   
   $done({ body: JSON.stringify(modified) });

@@ -11,7 +11,7 @@
 | 付费系统 | RevenueCat + 自建后端 |
 | ATS | ✅ NSAllowsArbitraryLoads = true，无 SSL Pinning |
 
-## 插件功能（v1.1 - 基于实际抓包修复）
+## 插件功能（v1.2 - 基于抓包修复转录失败）
 
 - ✅ **Pro 永久会员** — isPro=true, isProPermanentMember=true
 - ✅ **基础永久/月付/年付** — 全部解锁
@@ -22,6 +22,7 @@
 - ✅ **到期时间** — 全部改为 2099-12-31
 - ✅ **entitlement** — free → pro
 - ✅ **商品价格** — purchase-catalog 所有商品价格改为0
+- ✅ **强制转录成功** — transcript/create 服务端额度不足时强制伪造成功响应
 
 ## 拦截域名
 
@@ -56,16 +57,23 @@ https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/TingDia
 
 ## ⚠️ 重要说明
 
-v1.1 基于实际抓包数据修复了以下问题：
-- **修复路径匹配**：v1.0 使用 `/app/` 路径匹配，但实际请求中**根本没有这个路径前缀**（如 `/user/d6z7qikngvt2mxas` 而非 `/app/user/...`），导致脚本完全没生效
-- **修复字段名**：实际 JSON 中是 `isPro`（不是 `isSubscribed`），`entitlement` 是字符串 `"free"` 而非对象
-- **新增积分清零**：`pointsUsed` 和 `pointsFrozen` 强制归零，防止服务端累计扣分
+v1.2 修复了转录失败问题：
+- 服务端返回"点点额度不足，无法创建转录"时，强制伪造成功响应
+- 同时拦截 transcript/statuses 中的错误状态，强制改为 SUCCEEDED
+
+## 版本历史
+
+| 版本 | 说明 |
+|------|------|
+| v1.0 | 初始版本，正则写错完全没生效 |
+| v1.1 | 修复路径匹配和字段名，积分/会员功能正常 |
+| v1.2 | 新增 transcript/create 强制成功，修复转录失败 |
 
 ## 已知限制
 
 - RevenueCat 有本地缓存，需杀掉 App 重新打开才能生效
 - 翻译扣分在服务端执行，MITM 无法拦截服务端内部的积分扣减逻辑
-- 通过修改 `/user/...` 响应中的 `pointsUsed=0`、`pointsLimit=999999` 让 App 本地显示无限积分，但服务端实际扣分不受影响
+- 通过修改 `/user/...` 响应中的 `pointsUsed=0`、`pointsLimit=999999` 让 App 本地显示无限积分
 
 ## 仓库
 
