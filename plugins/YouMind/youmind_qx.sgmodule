@@ -2,7 +2,8 @@
 resource_parser_url = https://raw.githubusercontent.com/KOP-XDC/Quantumult-X-Resource-Script Format/master/parser.js
 
 [Script]
-http-response ^https?://hello-lucy\.com/api/v1/(getCurrentUser|subscription/findSubscription|credit/getCreditAccount|credit/getTotalBonusRedeem|credit/listCreditsConsumeTransactionsInCurrentPeriod|credit/listPermanentCreditGrants) requires-body = 1, tag = YouMind Pro Unlock v2, script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/refs/heads/master/plugins/YouMind/youmind_qx.js
+// YouMind Pro Unlock v2.1 - 2026-06-10
+http-response https?://hello-lucy\.com/api/v1/(getCurrentUser|subscription/findSubscription|credit/getCreditAccount) requires-body = 1, tag = YouMind Pro Unlock v2.1, script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/refs/heads/master/plugins/YouMind/youmind_qx.js
 
 [MITM]
 hostname = hello-lucy.com

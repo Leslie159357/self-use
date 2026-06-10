@@ -1,9 +1,9 @@
 #!META
 {
-  "name": "YouMind Pro Unlock v2.0",
-  "version": "2.0",
-  "desc": "解锁 YouMind Pro 会员 - 基于实际抓包数据（hello-lucy.com）",
-  "icon": "https://cdn.hello-lucy.com/web-images/eced863065b5129b7ff3473ab13846162380cc0fdcfc205700163702f6925470@chat"
+  "name": "YouMind Pro Unlock v2.1",
+  "version": "2.1",
+  "desc": "解锁 YouMind Pro 会员 - 基于抓包数据，支持 snake_case + camelCase 双格式",
+  "icon": "https://cdn.hello-lucy.com/web-images/a8bcbb846678ff2ac2a50e49ec03feee0fc30f2ff26dc15bf3156fe136c15e8d@chat"
 }
 #!META
 
@@ -11,4 +11,5 @@
 hostname = %APPEND% hello-lucy.com
 
 [Script]
-http-response ^https?://hello-lucy\.com/api/v1/(getCurrentUser|subscription/findSubscription|credit/getCreditAccount|credit/getTotalBonusRedeem|credit/listCreditsConsumeTransactionsInCurrentPeriod|credit/listPermanentCreditGrants) script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/refs/heads/master/plugins/YouMind/youmind_qx.js, requires-body = true, tag = YouMind Pro Unlock v2
+// YouMind Pro Unlock v2.1
+http-response https?://hello-lucy\.com/api/v1/(getCurrentUser|subscription/findSubscription|credit/getCreditAccount) requires-body = 1, tag = YouMind Pro Unlock v2.1, script-path = https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/refs/heads/master/plugins/YouMind/youmind_qx.js
