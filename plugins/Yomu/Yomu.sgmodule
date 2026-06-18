@@ -1,0 +1,16 @@
+#!name = Yomu Premium 解锁
+#!desc = 解锁 Yomu 漫画阅读器的全部 Premium 功能
+#!author = Minis
+#!home = https://github.com/Leslie159357/Loon-Plugins/tree/main/plugins/Yomu
+#!icon = https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/c9/5b/a4/c95ba48e-6360-4697-aba7-c1a1e1e80dcb/AppIcon-0-0-1x_U007emarketing-0-7-0-0-0-85-220-0.png/512x512bb.png
+#!system = ios
+#!date = 2026-06-18
+#!version = 1.0
+
+[Script]
+Yomu-Adapty-Profile = type=http-response, pattern=^https?:\/\/api\.adapty\.io\/api\/v1\/.*profile, requires-body=1, script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Yomu/yomu.js
+
+Yomu-Adapty-Fallback = type=http-response, pattern=^https?:\/\/fallback\.adapty\.io\/api\/v1\/.*profile, requires-body=1, script-path=https://raw.githubusercontent.com/Leslie159357/Loon-Plugins/main/plugins/Yomu/yomu.js
+
+[MITM]
+hostname = api.adapty.io, fallback.adapty.io, api-cn.adapty.io
