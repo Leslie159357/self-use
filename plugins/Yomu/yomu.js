@@ -1,43 +1,40 @@
 // ==CloakNote==
-// Yomu Premium 解锁 v1.4
-// 双脚本策略:
-//   请求脚本: 清除缓存hash → 强制 API 返回完整 profile
-//   响应脚本: 注入 paid_access_levels premium
+// Yomu Premium 解锁 v2.0
+// 直接替换整个 analytics profile 响应，无需依赖服务器数据
 // ==/CloakNote==
 
-// ========== 请求拦截：清除缓存 hash ==========
-// 当请求 analytics profiles 时，清除 previous-response-hash
-// 这样 API 会重新返回完整 profile 而非空对象
+const url = $request.url;
+let body = $response.body;
+
+// ========== 请求拦截 ==========
 if ($request && $request.headers) {
-  if ($request.headers['adapty-sdk-previous-response-hash']) {
-    $request.headers['adapty-sdk-previous-response-hash'] = '0000000000000000';
-    console.log('Yomu: cleared cache hash → force full profile');
-  }
-  if ($request.headers['if-none-match']) {
-    delete $request.headers['if-none-match'];
-  }
-  if ($request.headers['if-modified-since']) {
-    delete $request.headers['if-modified-since'];
+  // 清除所有缓存标识
+  if (url.indexOf('adaptytech.com') !== -1 && url.indexOf('/analytics/profiles/') !== -1) {
+    var headers = $request.headers;
+    if (headers['adapty-sdk-previous-response-hash']) {
+      headers['adapty-sdk-previous-response-hash'] = '0000000000000000';
+    }
+    if (headers['if-none-match']) {
+      headers['if-none-match'] = 'none';
+    }
   }
 }
 
-// ========== 响应拦截：注入 premium ==========
-let body = $response.body;
-
+// ========== 响应拦截 ==========
 if (body) {
   try {
-    let obj = JSON.parse(body);
+    var obj = JSON.parse(body);
 
+    // 拦截所有 analytics/profiles 的响应（GET 和 PATCH）
     if (url.indexOf('analytics/profiles/') !== -1 && url.indexOf('adaptytech.com') !== -1) {
-      console.log('Yomu: intercepted analytics profile response');
 
-      // 构造完整的 premium profile
+      // 直接替换整个 data 对象，生成含 premium 的完整 profile
       obj.data = {
         "type": "adapty_analytics_profile",
-        "id": "542ea0f4-4358-476b-ae97-16816927d831",
+        "id": "4249379d-26bb-470c-aded-d4aa0325d196",
         "attributes": {
           "app_id": "d4434d39-4786-4757-9b81-fbf9bdb4de3e",
-          "profile_id": "542ea0f4-4358-476b-ae97-16816927d831",
+          "profile_id": "4249379d-26bb-470c-aded-d4aa0325d196",
           "customer_user_id": null,
           "is_test_user": false,
           "total_revenue_usd": 999.99,
@@ -87,7 +84,6 @@ if (body) {
         }
       };
 
-      console.log('Yomu: ✓ premium injected');
       $done({body: JSON.stringify(obj)});
       return;
     }
@@ -95,8 +91,6 @@ if (body) {
     $done({});
 
   } catch (e) {
-    console.log('Yomu error: ' + e.message);
-    // 即使 JSON 解析失败也放行
     $done({});
   }
 } else {
