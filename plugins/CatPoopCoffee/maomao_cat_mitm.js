@@ -28,6 +28,12 @@
     '_fish': 99999,               // 鱼
     'tili': 999,                  // 体力
     'shopFishLeftCount': 999,     // 钓鱼剩余次数
+    'shopFishEndTime': 0,         // 钓鱼冷却时间（0=无冷却）
+    'shopDiamondLeftCount': 999,  // 商店钻石剩余
+    'shopDiamondEndTime': 0,      // 商店钻石冷却
+    'shopMoneyLeftCount': 999,    // 商店金币剩余
+    'shopMoneyEndTime': 0,        // 商店金币冷却
+    'shopFreeDiamond': 999,       // 免费钻石数
     'zhuanPanLeftCount': 999,     // 转盘剩余次数
     'flyGiftLeftCount': 999,      // 飞行礼包剩余次数
     'orderAdLeftCount': 999,      // 订单广告剩余次数
@@ -38,7 +44,12 @@
     'maxYanJIuCount': 99,         // 最大研究数
     'ADDoubleCount': 999,         // 广告翻倍次数
     'ADDoubleLeftCount': 999,     // 广告翻倍剩余
-    'allEarn': 9999999            // 总收益
+    'allEarn': 9999999,           // 总收益
+    '_researchCount': 999,        // 研究数量
+    '_roomCount': 999,            // 房间数量
+    '_decorateCount': 999,        // 装饰数量
+    'gameTime': 0,                // 游戏时间（置0防封）
+    'lianGameTime': 0             // 连连看游戏时间
   };
 
   // ===== 修改 localData =====
