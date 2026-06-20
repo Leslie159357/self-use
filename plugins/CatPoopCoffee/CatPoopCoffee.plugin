@@ -1,16 +1,19 @@
 #!name=猫屎咖啡 资源修改
-#!desc=猫屎咖啡微信小游戏 — 拦截上传数据，修改金钱/钻石/体力等资源
+#!desc=猫屎咖啡微信小游戏 — 双重拦截: 读取时注入大数值 + 上传时保持大数值
 #!author=Minis
 #!home=https://github.com/Leslie159357/self-use/tree/main/plugins/CatPoopCoffee
 #!icon=https://img.icons8.com/emoji/512/cat-face-emoji.png
 #!system=ios
 #!date=2026-06-20
-#!version=1.0
+#!version=2.0
 #!tag=cafe,game,猫屎咖啡,微信小游戏
 
 [Script]
-# 请求拦截: 上传数据时修改资源数值
-http-request ^https?:\/\/minigames\.liuzhaoling\.com\/userData\/upsertUserData script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/CatPoopCoffee/maomao_cat_mitm.js, timeout=10, tag=猫屎咖啡 资源修改
+# 响应拦截: 读取数据时注入大数值
+http-response ^https?:\/\/minigames\.liuzhaoling\.com\/userData\/getUserData script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/CatPoopCoffee/maomao_cat_mitm.js, requires-body=true, timeout=10, tag=猫屎咖啡 读取注入
+
+# 请求拦截: 上传数据时保持大数值
+http-request ^https?:\/\/minigames\.liuzhaoling\.com\/userData\/upsertUserData script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/CatPoopCoffee/maomao_cat_mitm.js, timeout=10, tag=猫屎咖啡 上传保持
 
 [MITM]
 hostname = %APPEND% minigames.liuzhaoling.com

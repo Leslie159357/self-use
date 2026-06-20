@@ -14,12 +14,13 @@
 
 | 接口 | 方法 | 说明 |
 |------|------|------|
+| `/userData/getUserData` | GET | 读取游戏存档（核心！需响应拦截） |
 | `/userData/upsertUserData` | POST | 上传完整游戏存档（JSON 字符串嵌套） |
 | `/userData/getUserDataUpTime` | GET | 查更新时间，参数: appId, key, openId |
 
 ## 数据架构
 
-游戏数据通过 `upsertUserData` 上传。`data` 字段是一个 JSON 字符串，内部结构：
+游戏数据通过 `upsertUserData` 上传，通过 `getUserData` 读取。`data` 字段是一个 JSON 字符串，内部结构：
 
 ```
 {
@@ -65,9 +66,15 @@
 
 ## 破解方案
 
-### 方案 1：MITM 请求改写（推荐）
+### 方案 1：MITM 双重拦截（推荐 ⭐）
 
-拦截 `POST /userData/upsertUserData` 的请求体，在 data 字符串中把资源数值改大后上传。
+**核心逻辑：** 这个游戏的数值存在微信小程序本地，服务器只做备份。
+所以需要拦截两条路径：
+
+1. **响应拦截** `GET /userData/getUserData` — 客户端读取服务器数据时，注入大数值
+2. **请求拦截** `POST /userData/upsertUserData` — 客户端上传时，也把数值改大，保持服务器备份一致
+
+脚本已内置双重拦截逻辑，一个 JS 文件同时处理两种场景。
 
 **Quantumult X 配置片段：**
 ```ini
