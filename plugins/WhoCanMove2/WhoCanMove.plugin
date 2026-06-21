@@ -1,0 +1,15 @@
+#!name=谁能挪完 免广告+资源修改
+#!desc=拼多多小游戏「谁能挪完」— 免看广告直接通关 + 无限金币/钻石
+#!author=Minis
+#!home=https://github.com/Leslie159357/self-use/tree/main/plugins/WhoCanMove
+#!icon=https://oss.dianwanshidai.cn/wx/3814/share/2026-03-13/c505dfb177928977865b952bd6237c1b.jpg
+#!system=ios
+#!date=2026-06-21
+#!version=1.0
+#!tag=game,拼多多,谁能挪完,免广告
+
+[Script]
+http-request ^https?://cpchxapi\.dianwanshidai\.com/app-api/game/chief/update script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/WhoCanMove/whocanmove_mitm.js, requires-body=true, timeout=10, tag=谁能挪完 资源拦截
+
+[MITM]
+hostname = %APPEND% cpchxapi.dianwanshidai.com
