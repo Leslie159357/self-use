@@ -9,7 +9,7 @@
 #!tag=game,拼多多,谁能挪完,免广告
 
 [Script]
-http-request ^https?://cpchxapi\.dianwanshidai\.com/app-api/game/chief/update script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/WhoCanMove/whocanmove_mitm.js, requires-body=true, timeout=10, tag=谁能挪完 资源拦截
+http-request ^https?://cpchxapi\.dianwanshidai\.com/app-api/game/chief/update script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/WhoCanMove2/whocanmove_mitm.js, requires-body=true, timeout=10, tag=谁能挪完 资源拦截
 
 [MITM]
 hostname = %APPEND% cpchxapi.dianwanshidai.com

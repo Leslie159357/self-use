@@ -8,7 +8,7 @@ AppId: wxcb8d7b6dfad21e95
 - `cpchxapi.dianwanshidai.com/app-api/game/chief/update` — 无sign校验
 
 ## 破解方法
-Loon插件: https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/WhoCanMove/WhoCanMove.plugin
+Loon插件: https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/WhoCanMove2/WhoCanMove.plugin
 
 直接curl:
 curl -X POST 'https://cpchxapi.dianwanshidai.com/app-api/game/chief/update' \
