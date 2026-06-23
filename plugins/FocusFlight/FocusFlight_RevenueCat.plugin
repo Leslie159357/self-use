@@ -1,21 +1,15 @@
 #!name=FocusFlight 订阅破解
 #!desc=劫持 RevenueCat 响应，解锁 FocusFlight 全部 Pro/Premium/Plus/All-Access 权益
-#!homepage=https://github.com/focusflights
+#!homepage=https://github.com/Leslie159357/self-use
 #!author=Minis
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/4d/ff/33/4dff3381-c068-09d1-4978-8c38ed582d8a/AppIcon-0-0-1x_U007epad-0-0-0-0-0-0-85-220-0.png/512x512bb.png
 #!date=2026-06-23
 #!version=1.0
 
 [General]
-# 劫持 RevenueCat 订阅查询接口
-# 开启 MITM 后，FocusFlight 确认订阅已解锁即可关闭 MITM
-# 插件会缓存一次劫持结果，App 重启后若 MITM 关闭，依赖本地缓存
 
 [MITM]
 hostname = %APPEND% api.revenuecat.com
 
 [Script]
-http-response ^https:\/\/api\.revenuecat\.com\/v1\/subscribers\/[^\/]+$ script-path = FocusFlight_RC.js, requires-body = true, tag = FocusFlight Subscriber
-
-[Script File]
-FocusFlight_RC.js = FocusFlight_RC.js
+http-response ^https:\/\/api\.revenuecat\.com\/v1\/subscribers\/[^\/]+$ script-path = https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/FocusFlight/FocusFlight_RC.js, requires-body = true, tag = FocusFlight Subscriber, timeout = 10
