@@ -1,18 +1,17 @@
-// FocusFlight RevenueCat 订阅劫持脚本
-// 拦截 /v1/subscribers/* 响应，返回伪造的全量权益数据
-// 支持 FocusFlight 所有权益: pro, premium, plus, all_access
+// FocusFlight RevenueCat 订阅劫持脚本 v3.0
+// 同时支持 http-request（直接回复）和 http-response（替换响应）
+// 拦截 /v1/subscribers/ 所有路径（包括 offerings）
 
 const url = $request.url;
-const isSubscriberRequest = /\/v1\/subscribers\/[^\/]+$/.test(url);
+const isSubscriberRequest = /\/v1\/subscribers\//.test(url);
 
-// 只劫持 subscribers 查询（非 offerings）
 if (!isSubscriberRequest) {
   $done({});
   return;
 }
 
-// 伪造响应体
-const fakeResponse = {
+// 统一伪造响应体（包含完整 entitlements + subscriptions）
+const fakeResponseBody = JSON.stringify({
   "request_date": "2099-12-31T23:59:59Z",
   "request_date_ms": "9999999999999",
   "subscriber": {
@@ -83,12 +82,12 @@ const fakeResponse = {
       }
     },
     "first_seen": "2026-06-23T07:02:16Z",
-    "last_seen": "2026-06-23T07:02:16Z",
+    "last_seen": "2026-06-23T07:50:59Z",
     "management_url": "https://apps.apple.com/account/subscriptions",
     "non_subscriptions": {},
-    "original_app_user_id": "unknown",
-    "original_application_version": null,
-    "original_purchase_date": null,
+    "original_app_user_id": "$RCAnonymousID:de40d95d15ce4f4db825ddfd11054970",
+    "original_application_version": "265",
+    "original_purchase_date": "2024-01-01T00:00:00Z",
     "other_purchases": {},
     "subscriptions": {
       "net.cementpla.focusflights.premium.monthly": {
@@ -129,15 +128,32 @@ const fakeResponse = {
       }
     }
   }
+});
+
+const fakeHeaders = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Expose-Headers": "X-Request-Id",
+  "X-RevenueCat-Request-Time": Date.now().toString()
 };
 
-// 返回伪造响应
-$done({
-  status: 200,
-  headers: {
-    "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Expose-Headers": "X-Request-Id"
-  },
-  body: JSON.stringify(fakeResponse)
-});
+// 判断是 request 还是 response 阶段
+// Loon http-request: 有 $request.url 没有 $response
+// Loon http-response: 有 $response.status
+if (typeof $response === 'undefined' || $response === null) {
+  // http-request 阶段：直接回复伪造数据
+  $done({
+    response: {
+      status: 200,
+      headers: fakeHeaders,
+      body: fakeResponseBody
+    }
+  });
+} else {
+  // http-response 阶段：替换响应体
+  $done({
+    status: 200,
+    headers: fakeHeaders,
+    body: fakeResponseBody
+  });
+}
