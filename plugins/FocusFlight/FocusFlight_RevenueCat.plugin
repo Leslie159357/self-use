@@ -4,16 +4,10 @@
 #!author=Minis
 #!home=https://github.com/Leslie159357/self-use
 #!date=2026-06-23
-#!version=1.0
+#!version=2.0
 
 [Script]
-http-response ^https:\/\/api\.revenuecat\.com\/v1\/subscribers\/[^\/]+$ script-path=https://cdn.jsdelivr.net/gh/Leslie159357/self-use@main/plugins/FocusFlight/FocusFlight_RC.js, requires-body=true, timeout=10, tag=FocusFlight Subscriber
+http-response ^https?://api\.revenuecat\.com/v1/subscribers script-path=https://raw.githubusercontent.com/Leslie159357/self-use/main/plugins/FocusFlight/FocusFlight_RC.js, requires-body=true, timeout=10, tag=FocusFlight Subscriber
 
-[Mitm]
+[MITM]
 hostname = %APPEND% api.revenuecat.com
-
-# ⚠️ 如果 Loon 显示"脚本为空"，请检查：
-# 1. 在 Loon → 更多 → 清空 DNS 缓存 → 重启 Loon
-# 2. 或改用本地脚本：下载 FocusFlight_RC.js 放到 Loon/Scripts/ 目录
-#   并将上面 script-path 改为 script-path=FocusFlight_RC.js
-# 3. 确保已开启 MITM 并安装信任证书
